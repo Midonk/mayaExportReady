@@ -47,14 +47,14 @@ add options  (radio)
 ```python
 cmds.pluginInfo("name", ...)
 ``` 
-- clean up
+- **clean up**
 ```python
 cmds.polyClean()
 ```
 
 - progress bar
 
-- non manyfold => polyInfo (warning)
+- **non manyfold => polyInfo (warning)**
 ```python
 cmds.polyInfo()
 ```
@@ -87,10 +87,12 @@ mettre les données d'exports le fichier original en tant que métadonnée
     - suppression du fichier / override
 1. Duplication du projet dans le dossier de la source avec le suffixe '_export'
 1. ouverture du projet dans maya
-1. récupération des meshs à exporter
-1. freeze les transformations
-1. delete l'history
-1. conformer les normales
+1. **récupération des meshs à exporter**
+1. **freeze les transformations**
+1. **delete l'history**
+1. **conformer les normales**
+1. **Rebuild normals**
 1. Positionner les pivots en fonctions des préférences
-1. clean up
+1. **clean up**
+1. **check for non-manyfold mesh**
 1. tell the user everything has been applied

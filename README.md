@@ -96,3 +96,8 @@ mettre les données d'exports le fichier original en tant que métadonnée
 1. **clean up**
 1. **check for non-manyfold mesh**
 1. tell the user everything has been applied
+
+
+# Install
+
+copy and run this in python console in Maya

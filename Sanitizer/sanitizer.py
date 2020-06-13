@@ -11,7 +11,6 @@ conformNormals = True
 rebuildNormals = True
 rebuildNormalOption = 0
 customNormalAngle = 60
-bakePivot = True
 pivotOption = 1
 cleanUpMesh = True
 checkNonManyfold = True
@@ -65,7 +64,8 @@ def createWindow(name, callback):
     # PIVOT PANEL
     cmds.columnLayout("Pivot", adj=True)
     cmds.text(label="Options:", align="left")
-    cmds.radioButtonGrp("pivotOption", labelArray4=['Untouched', 'Mesh center', 'Scene center', 'Base center'], numberOfRadioButtons=4,
+    cmds.radioButtonGrp("pivotOption", labelArray4=['Untouched', 'Mesh center', 'Scene center', 'Base center'],
+                        numberOfRadioButtons=4,
                         select=pivotOption,
                         vertical=True)
     cmds.setParent('..')
@@ -145,15 +145,19 @@ def utility(title, message):
     if displayInfo:
         info(title, message)
 
+
 """
 GROUP FINDER
 """
+
+
 def isGroup(element):
     children = cmds.listRelatives(element, children=True)
     for child in children:
-        if not cmds.ls(child, transforms = True):
+        if not cmds.ls(child, transforms=True):
             return False
     return True
+
 
 """
 Link params between UI and script
@@ -351,17 +355,34 @@ def sanitizer():
     if pivotOption == 2:
         utility("Info", "The script set the pivot of your mesh at the center of them")
         for mesh in meshes:
-            cmds.xform(mesh, relative=True, centerPivots=True)
+            cmds.xform(mesh, r=True, centerPivots=True)
 
     elif pivotOption == 3:
         utility("Info", "The script set the pivot of your mesh at the center of scene")
         for mesh in meshes:
-            cmds.xform(mesh,worldSpace=True, pivots=[0, 0, 0])
+            cmds.xform(mesh, ws=True, pivots=[0, 0, 0])
+        print("opt center scene")
 
     elif pivotOption == 4:
         utility("Info", "The script set the pivot of your mesh at the center of the bottom of your mesh")
+        for mesh in meshes:
+            cmds.xform(mesh, r=True, centerPivots=True)
+            pivotPos = cmds.xform(mesh, q=True, pivots=True, ws=True)
+            print("pivotPos", pivotPos)
 
-        print("opt center scene")
+            # Get vtx pos from  Narann => https://www.fevrierdorian.com/blog/post/2011/09/27/Quickly-retrieve-vertex-positions-of-a-Maya-mesh-%28English-Translation%29
+            vtxWorldPosition = []
+            vtxIndexList = cmds.getAttr(mesh + ".vrts", multiIndices=True)
+            for i in vtxIndexList:
+                curPointPosition = cmds.xform(mesh + ".pnts[" + str(i) + "]", q=True, t=True, ws=True)
+                vtxWorldPosition.append(curPointPosition)
+            # end of Narann code
+
+            def sortinFct(e):
+                return e[1]
+
+            vtxWorldPosition.sort(key=sortinFct)
+            cmds.xform(mesh, ws=True, pivots=[pivotPos[0], vtxWorldPosition[0][1], pivotPos[2]])
 
     # clean up
     if cleanUpMesh:

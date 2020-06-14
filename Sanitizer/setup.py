@@ -1,9 +1,15 @@
 import maya.mel as mel
 import maya.cmds as cmds
-# import main.sanitizer as sanitizer
 
-mainShelfLayout = mel.eval('global string $gShelfTopLevel; string $tmp=$gShelfTopLevel;')
-shelves = cmds.tabLayout(mainShelfLayout, q=True, childArray=True)
+def createShelf():
+    mainShelfLayout = mel.eval('global string $gShelfTopLevel; string $tmp=$gShelfTopLevel;')
+    # shelves = cmds.tabLayout(mainShelfLayout, q=True, childArray=True)
+    command = '''
+import Sanitizer.main as main
+main.launchApp()
+    '''
 
-menuItem = cmds.optionMenu('tabMenu', q=True, value=True)
-cmds.shelfButton(parent=mainShelfLayout + "|" + menuItem, label="Sanitizer" ''', image="playblast.png"''', sourceType='Python', command=command)
+    #menuItem = cmds.optionMenu('Sanitizer', width=200, enable=False)
+    mel.eval('addNewShelfTab ' + 'Sanitizer')
+    print(mainShelfLayout)
+    cmds.shelfButton(parent=mainShelfLayout + "|" + 'Sanitizer', label="Sanitizer", image="playblast.png", sourceType='Python', command=command)

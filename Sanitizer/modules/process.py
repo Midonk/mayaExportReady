@@ -82,17 +82,17 @@ def checkDuplication(scene):
 
 # Split transform nodes between meshes and groups
 def splitTransform():
-    storage.values.transformNodes = cmds.ls(sl=True, type="transform")
-    for node in storage.values.transformNodes:
+    storage.transformNodes = cmds.ls(sl=True, type="transform")
+    for node in storage.transformNodes:
         if utility.isGroup(node):
-            storage.values.groups.append(node)
+            storage.groups.append(node)
 
         else:
-            storage.values.meshes.append(node)
+            storage.meshes.append(node)
 
-    print("transformNodes", storage.values.transformNodes)
-    print("meshes", storage.values.meshes)
-    print("groups", storage.values.groups)
+    print("transformNodes", storage.transformNodes)
+    print("meshes", storage.meshes)
+    print("groups", storage.groups)
 
 
 # Rebuild normals

@@ -1,13 +1,14 @@
 import maya.cmds as cmds
 import process
 from Sanitizer import storage
+import utility
 
 """
 Link params between UI and script
 """
 
 
-def getParams(values):
+def getParams():
     storage.values.freezeTransform = cmds.checkBox("freezeTransform", q=True, v=True)
     storage.values.deleteHistory = cmds.checkBox("deleteHistory", q=True, v=True)
     storage.values.selectionOnly = cmds.checkBox("selectionOnly", q=True, v=True)
@@ -20,6 +21,8 @@ def getParams(values):
     storage.values.checkNonManyfold = cmds.checkBox("checkNonManyfold", q=True, v=True)
     storage.values.alwaysOverrideExport = cmds.checkBox("alwaysOverrideExport", q=True, v=True)
     storage.values.displayInfo = cmds.checkBox("displayInfo", q=True, v=True)
+
+    utility.setAllMetadata()
 
     cmds.deleteUI("sanitizer")
     process.sanitizer()

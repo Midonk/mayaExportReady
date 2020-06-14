@@ -1,12 +1,22 @@
-import modules.utility as utility
-import maya.cmds as cmds
-import os
 
 """
 PROCESS NEEDED VALUES
 """
+streams = {"freezeTransform":"sanBoolStruct",
+            "deleteHistory":"sanBoolStruct",
+            "selectionOnly":"sanBoolStruct",
+            "conformNormals":"sanBoolStruct",
+            "rebuildNormals":"sanBoolStruct",
+            "rebuildNormalOption":"sanIntStruct",
+            "customNormalAngle":"sanIntStruct",
+            "pivotOption":"sanIntStruct",
+            "cleanUpMesh":"sanBoolStruct",
+            "checkNonManyfold":"sanBoolStruct",
+            "alwaysOverrideExport":"sanBoolStruct",
+            "displayInfo":"sanBoolStruct"}
 
-values = utility.Values()
+values = None
+
 scene = ""
 transformNodes = []
 meshes = []
@@ -23,6 +33,5 @@ globalColumnOffset = 5
 globalRowOffset = 15
 optionOffset = 10
 
-unityRefDir = os.path.join(os.path.dirname(os.path.dirname(cmds.about(env=True))),
-                           "scripts/Sanitizer/Refs")
+unityRefDir = ""
 unityRefs = {}

@@ -45,7 +45,6 @@ def displayRefs(refDir):
     refObj = cmds.getFileList(folder=refDir, filespec="*.obj") or []
     cmds.button('unityImportRef', e=True, enable=len(refFbx) > 0 or len(refObj))
 
-
     if len(refFbx) > 0:
         cmds.text(l="")
         cmds.text(l="FBX:")
@@ -75,7 +74,8 @@ def importRef(*args):
         path = os.path.join(storage.unityRefDir, ref + storage.unityRefs[ref])
         cmds.file(path, i=True, mergeNamespacesOnClash=True)
 
-def createWindow(name, callback, ):
+
+def createWindow(name, callback):
     print('\nLancement du script\n')
 
     # check if the window exists already

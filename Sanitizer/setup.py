@@ -7,7 +7,7 @@ def createShelf():
     command = '''
 import Sanitizer.main as main
 main.launchApp()
-    '''
+'''
 
     #menuItem = cmds.optionMenu('Sanitizer', width=200, enable=False)
     mel.eval('addNewShelfTab ' + 'Sanitizer')

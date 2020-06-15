@@ -72,7 +72,12 @@ def importRef(*args):
     ref = cmds.radioCollection("unityRefs", q=True, select=True)
     if ref != "NONE":
         path = os.path.join(storage.unityRefDir, ref + storage.unityRefs[ref])
-        cmds.file(path, i=True, mergeNamespacesOnClash=True)
+        importedNodes = cmds.file(path, i=True, mergeNamespacesOnClash=True, returnNewNodes=True)
+        cmds.select(clear=True)
+        for node in importedNodes:
+            cmds.select(node, add=True)
+
+    else: info("Import error", "You have to select an element to import")
 
 
 def createWindow(name, callback):
@@ -83,27 +88,25 @@ def createWindow(name, callback):
         cmds.deleteUI("sanitizer")
     _win = cmds.window("sanitizer", title=name)
 
-    # GENERAL PANEL
-    cmds.rowColumnLayout("global", adjustableColumn=True,
-                         columnOffset=[1, "both", storage.globalColumnOffset])
-
+    cmds.rowColumnLayout("global", adjustableColumn=True, columnOffset=[1, "both", storage.globalColumnOffset])
     cmds.shelfTabLayout('mainShelfTab', w=storage.shelfWidth)
+
+    # GENERAL PANEL
     cmds.columnLayout("General", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l="")
     cmds.checkBox("freezeTransform", l="Freeze transformations", v=storage.values.freezeTransform)
     cmds.checkBox("deleteHistory", l="Delete history", v=storage.values.deleteHistory)
     cmds.checkBox("selectionOnly", l="Selection only", v=storage.values.selectionOnly)
     cmds.checkBox("cleanUpMesh", l="Clean up meshes", v=storage.values.cleanUpMesh)
-    cmds.checkBox("checkNonManyfold", l="Check for non-manyfold meshes",
-                  v=storage.values.checkNonManyfold)
-
+    cmds.checkBox("checkNonManyfold", l="Check for non-manyfold meshes", v=storage.values.checkNonManyfold)
+    cmds.text(l="")
     cmds.setParent('..')
+
     # NORMAL PANEL
     cmds.columnLayout("Normal", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l="")
     cmds.checkBox("conformNormals", l="Conform normals", v=storage.values.conformNormals)
-
-    cmds.checkBox("rebuildNormals", l="Rebuild normals",
-                  v=storage.values.rebuildNormals,
-                  cc=enableRebuildOption)
+    cmds.checkBox("rebuildNormals", l="Rebuild normals", v=storage.values.rebuildNormals, cc=enableRebuildOption)
     cmds.text(label="")
     cmds.text(label="Rebuild options:", align="left")
     cmds.radioButtonGrp("rebuildNormalOption", labelArray3=['Soft', 'Hard', 'Custom'],
@@ -112,21 +115,22 @@ def createWindow(name, callback):
                         vertical=True,
                         enable=storage.values.rebuildNormals,
                         cc=enableCustomAngle)
-    cmds.intField("customNormalAngle", min=0, max=180,
-                  v=storage.values.customNormalAngle,
-                  enable=getRebuildOption())
-
+    cmds.intField("customNormalAngle", min=0, max=180, v=storage.values.customNormalAngle, enable=getRebuildOption())
+    cmds.text(l="")
     cmds.setParent('..')
+
     # PIVOT PANEL
     cmds.columnLayout("Pivot", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l="")
     cmds.text(label="Options:", align="left")
     cmds.radioButtonGrp("pivotOption",
                         labelArray4=['Untouched', 'Mesh center', 'Scene center', 'Base center'],
                         numberOfRadioButtons=4,
                         select=storage.values.pivotOption,
                         vertical=True)
-
+    cmds.text(l="")
     cmds.setParent('..')
+
     # UITY PANEL
     cmds.columnLayout("Unity", adj=True, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l="")
@@ -136,12 +140,14 @@ def createWindow(name, callback):
     cmds.button('unityImportRef', l='Import reference', c=importRef)
     cmds.text(l="")
     displayRefs(storage.unityRefDir)
-
     cmds.setParent('..')
+
     # SETTINGS PANEL
     cmds.columnLayout("Settings", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l="")
     cmds.checkBox("alwaysOverrideExport", l="Override existing export file", v=storage.values.alwaysOverrideExport)
     cmds.checkBox("displayInfo", l="Display informations", v=storage.values.displayInfo)
+    cmds.text(l="")
 
     cmds.setParent('|')
     cmds.text(l="")

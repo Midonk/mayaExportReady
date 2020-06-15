@@ -15,16 +15,17 @@ def saveScene():
         if storage.scene != "":
             cmds.file(save=True)
 
+        # the file need a name => then a location
         else:
             scene = cmds.fileDialog2(ds=2, fm=0)
-            # The user canceled the dialog
             if scene is not None:
                 storage.scene = scene[0]
-                sName = os.path.splitext(storage.scene)[0]
-                storage.scene = cmds.file(scene, rename=sName + '.ma')
+                sceneName = os.path.splitext(storage.scene)[0]
+                storage.scene = cmds.file(scene, rename=sceneName + '.ma')
                 cmds.file(save=True, type='mayaAscii')
                 print("scene saved as", storage.scene)
 
+            # The user canceled the dialog
             else:
                 if storage.values.displayInfo:
                     ui.info("Warning", "The script can't continue without saving")
@@ -47,6 +48,7 @@ def checkSave():
             saveScene()
             return True
 
+        # The user canceled the modal
         else:
             print("\nEnd of script\n")
             return False
@@ -57,6 +59,7 @@ def checkSave():
 # Check if the opened scene is an export file
 def checkExportFile(sceneName):
     if "_export" in sceneName:
+        # The user canceled the modal
         if not ui.confirm("File duplication",
                           "It seems the open scene is already an export file.\n"
                           "\nAre you sure you want to run the script on this scene ?\n"):
@@ -68,10 +71,9 @@ def checkExportFile(sceneName):
 
 # Check if there is already an existing export file of the opened scene
 def checkDuplication(scene):
-    if storage.values.displayInfo:
-        ui.info("Info", "The script is now checking for an existing export file generated earlier")
-
-    if not storage.values.alwaysOverrideExport and cmds.file(storage.scene, q=True, exists=True):
+    # if the user doesn't want to override the existing export file and that an export file of the opened scene exists
+    if not storage.values.alwaysOverrideExport and cmds.file(scene, q=True, exists=True):
+        # The user canceled the modal
         if not ui.confirm("Override export file",
                           "An export file of this scene may already exist.\n\nDo you want to override it ?"):
             print("\nEnd of script\n")
@@ -98,12 +100,15 @@ def splitTransform():
 # Rebuild normals
 def rebuildNormals():
     for mesh in storage.meshes:
+        # Rebuild in classic soft edge
         if storage.values.rebuildNormalOption == 1:
             cmds.polySoftEdge(mesh, a=30)
 
+        # Rebuild in hard edge
         elif storage.values.rebuildNormalOption == 2:
             cmds.polySoftEdge(mesh, a=0)
 
+        # Rebuild with a custom angle (till 180)
         elif storage.values.rebuildNormalOption == 3:
             cmds.polySoftEdge(mesh, a=storage.values.customNormalAngle)
 
@@ -140,6 +145,7 @@ def setPivot():
                 vtxWorldPosition.append(curPointPosition)
             # end of Narann code
 
+            # get the lowest vertex Y transform at first
             vtxWorldPosition.sort(key=lambda e: e[1])
             cmds.xform(mesh, ws=True, pivots=[pivotPos[0], vtxWorldPosition[0][1], pivotPos[2]])
 
@@ -197,10 +203,11 @@ def sanitizer():
     if not checkExportFile(sceneName):
         return
 
-    # Wright metadata
-
     # Check if there is no duplicated project
     sceneCopy = os.path.join(os.path.dirname(storage.scene), sceneName + "_export" + sceneExtension)
+
+    if storage.values.displayInfo:
+        ui.info("Info", "The script is now checking for an existing export file generated earlier")
 
     if not checkDuplication(sceneCopy):
         return
@@ -216,7 +223,6 @@ def sanitizer():
         ui.info("Info", "The script is opening the duplicated scene in Maya")
 
     cmds.file(sceneCopy, open=True)
-    print("sceneCopy", sceneCopy)
 
     # """""""""""""""""""""
 
@@ -224,7 +230,7 @@ def sanitizer():
 
     # """""""""""""""""""""
 
-    # Getting all transformNodes in the scene
+    # Getting all transformNodes needed
     if storage.values.displayInfo:
         ui.info("Info", "The script gather all the transformNodes of the scene to prepare them to the export")
 
@@ -234,7 +240,7 @@ def sanitizer():
     # Splitting into meshes and groups
     splitTransform()
 
-    # Make sure at list one mesh or group is selected
+    # Make sure that at least one mesh or group is selected
     if len(storage.transformNodes) == 0:
         ui.info("Error", "No mesh or group detected in your scene")
         print('\nFin du script\n')
@@ -261,7 +267,8 @@ def sanitizer():
     if storage.values.rebuildNormals:
         if storage.values.displayInfo:
             ui.info("Info",
-                    "The script rebuild the normals of your transformNodes as you asked for, with parameter " + str(storage.values.rebuildNormalOption))
+                    "The script rebuild the normals of your transformNodes as you asked for, with parameter " + str(
+                        storage.values.rebuildNormalOption))
 
         rebuildNormals()
 

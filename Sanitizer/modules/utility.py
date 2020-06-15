@@ -1,11 +1,8 @@
 import maya.cmds as cmds
 from Sanitizer import storage
 
-"""
-GROUP FINDER
-"""
 
-
+# Determine wether a transform is a group or not
 def isGroup(element):
     children = cmds.listRelatives(element, children=True)
     for child in children:
@@ -13,9 +10,9 @@ def isGroup(element):
             return False
     return True
 
-
+# The value object
 class Values:
-    def __init__(self, freeze = True, delete = True, selectOnly = False, conform = True, rebuild = True, rebuildOption = 1, customAngle = 60, pivot = 1, clean = True, manyFold = True, override = False, info = True):
+    def __init__(self, freeze = True, delete = True, selectOnly = False, conform = True, rebuild = True, rebuildOption = 1, customAngle = 60, pivot = 1, clean = True, manyFold = True, override = False, info = False):
         self.freezeTransform = freeze
         self.deleteHistory = delete
         self.selectionOnly = selectOnly
@@ -30,6 +27,7 @@ class Values:
         self.displayInfo = info
         self.win = None
 
+# Update all metadata
 def setAllMetadata():
     cmds.editMetadata(streamName='freezeTransform', index=0, value=storage.values.freezeTransform, scene=True)
     cmds.editMetadata(streamName='deleteHistory', index=0, value=storage.values.deleteHistory, scene=True)

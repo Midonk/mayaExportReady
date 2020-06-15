@@ -3,11 +3,8 @@ import process
 from Sanitizer import storage
 import utility
 
-"""
-Link params between UI and script
-"""
 
-
+# Link params between UI and script
 def getParams():
     storage.values.freezeTransform = cmds.checkBox("freezeTransform", q=True, v=True)
     storage.values.deleteHistory = cmds.checkBox("deleteHistory", q=True, v=True)
@@ -22,7 +19,9 @@ def getParams():
     storage.values.alwaysOverrideExport = cmds.checkBox("alwaysOverrideExport", q=True, v=True)
     storage.values.displayInfo = cmds.checkBox("displayInfo", q=True, v=True)
 
+    # update all metadata
     utility.setAllMetadata()
 
     cmds.deleteUI("sanitizer")
+    # launch the process
     process.sanitizer()

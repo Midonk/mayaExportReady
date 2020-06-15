@@ -2,6 +2,7 @@
 """
 PROCESS NEEDED VALUES
 """
+# strem names and value names paired with their struct
 streams = {"freezeTransform":"sanBoolStruct",
             "deleteHistory":"sanBoolStruct",
             "selectionOnly":"sanBoolStruct",

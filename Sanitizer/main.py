@@ -12,7 +12,8 @@ import modules.utility as utility
 import modules.params as params
 import modules.process as process
 
-
+#DEV
+# reload all modules to refresh them
 def reloadAll():
     reload(ui)
     reload(utility)
@@ -22,9 +23,11 @@ def reloadAll():
 
 
 # Retrieve value from metadata and set to values
+# or create them if they doesn't exists
 def initialize():
     streamsName = storage.streams.keys()
 
+    # retrieve values
     if cmds.hasMetadata(channelName='sanitizer', scene=True)[0]:
         storage.values = utility.Values()
         for stream in streamsName:
@@ -32,6 +35,7 @@ def initialize():
 
         storage.unityRefDir = cmds.getMetadata(streamName="unityRefDir", index=0, scene=True)[0]
 
+    # create metadata
     else:
         print("Creation of metadata")
         cmds.dataStructure(format='raw', asString='name=sanBoolStruct:bool=value')
@@ -53,6 +57,7 @@ def initialize():
         storage.unityRefDir = os.path.join(os.path.dirname(os.path.dirname(cmds.about(env=True))),
                                            "scripts/Sanitizer/Refs")
 
+    # Apply metadata values on the scene
     utility.setAllMetadata()
 
 

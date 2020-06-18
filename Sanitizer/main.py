@@ -1,7 +1,4 @@
 # coding=utf-8
-"""
-main app core
-"""
 
 from imp import reload
 import maya.cmds as cmds
@@ -12,7 +9,8 @@ import modules.utility as utility
 import modules.params as params
 import modules.process as process
 
-#DEV
+
+# DEV
 # reload all modules to refresh them
 def reloadAll():
     reload(ui)
@@ -23,11 +21,11 @@ def reloadAll():
 
 
 # Retrieve value from metadata and set to values
-# or create them if they doesn't exists
+# or create them if they doesn't exists and initialize them
 def initialize():
     streamsName = storage.streams.keys()
 
-    # retrieve values
+    # retrieve metadata
     if cmds.hasMetadata(channelName='sanitizer', scene=True)[0]:
         storage.values = utility.Values()
         for stream in streamsName:
@@ -59,7 +57,6 @@ def initialize():
 
     # Apply metadata values on the scene
     utility.setAllMetadata()
-
 
 
 # Launch app

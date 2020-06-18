@@ -1,46 +1,59 @@
+# coding=utf-8
+
 import maya.cmds as cmds
 from Sanitizer import storage
 
 
 # Determine wether a transform is a group or not
-def isGroup(element):
-    children = cmds.listRelatives(element, children=True)
-    for child in children:
-        if not cmds.ls(child, transforms=True):
-            return False
-    return True
+# test if the transform node has a child of type "mesh"
+def isMesh(node):
+    if cmds.nodeType(node) == "mesh":
+        return True
+
+    childs = cmds.listRelatives(node, children=True)
+    if childs:
+        for child in childs:
+            if cmds.nodeType(child) == "mesh":
+                return True
+
+    return False
+
+    # children = cmds.listRelatives(element, children=True)
+    # for child in children:
+    #     if not cmds.ls(child, transforms=True):
+    #         return False
+    # return True
+
 
 # The value object
 class Values:
-    def __init__(self, freeze = True, delete = True, selectOnly = False, conform = True, rebuild = True, rebuildOption = 1, customAngle = 60, pivot = 1, clean = True, manyFold = True, override = False, info = False):
-        self.freezeTransform = freeze
-        self.deleteHistory = delete
-        self.selectionOnly = selectOnly
-        self.conformNormals = conform
-        self.rebuildNormals = rebuild
-        self.rebuildNormalOption = rebuildOption
-        self.customNormalAngle = customAngle
-        self.pivotOption = pivot
-        self.cleanUpMesh = clean
-        self.checkNonManyfold = manyFold
-        self.alwaysOverrideExport = override
-        self.displayInfo = info
+    def __init__(self, _freezeTransform=True, _deleteHistory=True, _selectionOnly=False, _conformNormals=True, _rebuildNormals=True, _rebuildNormalOption=1,
+                 _customNormalAngle=60, _pivotOption=1, _cleanUpMesh=True, _checkNonManyfold=True, _alwaysOverrideExport=False, _displayInfo=False):
+        self.freezeTransform = _freezeTransform
+        self.deleteHistory = _deleteHistory
+        self.selectionOnly = _selectionOnly
+        self.conformNormals = _conformNormals
+        self.rebuildNormals = _rebuildNormals
+        self.rebuildNormalOption = _rebuildNormalOption
+        self.customNormalAngle = _customNormalAngle
+        self.pivotOption = _pivotOption
+        self.cleanUpMesh = _cleanUpMesh
+        self.checkNonManyfold = _checkNonManyfold
+        self.alwaysOverrideExport = _alwaysOverrideExport
+        self.displayInfo = _displayInfo
         self.win = None
+
+
+# Update unityRef directory in metadata
+def setUnityRefDir():
+    cmds.editMetadata(streamName='unityRefDir', channelName='sanitizer', index=0, stringValue=storage.unityRefDir,
+                      scene=True)
+
 
 # Update all metadata
 def setAllMetadata():
-    cmds.editMetadata(streamName='freezeTransform', index=0, value=storage.values.freezeTransform, scene=True)
-    cmds.editMetadata(streamName='deleteHistory', index=0, value=storage.values.deleteHistory, scene=True)
-    cmds.editMetadata(streamName='selectionOnly', index=0, value=storage.values.selectionOnly, scene=True)
-    cmds.editMetadata(streamName='conformNormals', index=0, value=storage.values.conformNormals, scene=True)
-    cmds.editMetadata(streamName='rebuildNormals', index=0, value=storage.values.rebuildNormals, scene=True)
-    cmds.editMetadata(streamName='rebuildNormalOption', index=0, value=storage.values.rebuildNormalOption, scene=True)
-    cmds.editMetadata(streamName='customNormalAngle', index=0, value=storage.values.customNormalAngle, scene=True)
-    cmds.editMetadata(streamName='pivotOption', index=0, value=storage.values.pivotOption, scene=True)
-    cmds.editMetadata(streamName='cleanUpMesh', index=0, value=storage.values.cleanUpMesh, scene=True)
-    cmds.editMetadata(streamName='checkNonManyfold', index=0, value=storage.values.checkNonManyfold, scene=True)
-    cmds.editMetadata(streamName='alwaysOverrideExport', index=0,
-                      value=storage.values.alwaysOverrideExport, scene=True)
-    cmds.editMetadata(streamName='displayInfo', index=0, value=storage.values.displayInfo, scene=True)
-    print(storage.unityRefDir)
-    cmds.editMetadata(streamName='unityRefDir', index=0, stringValue=storage.unityRefDir, scene=True)
+    for stream in storage.streams.keys():
+        cmds.editMetadata(streamName=stream, channelName='sanitizer', index=0, value=getattr(storage.values, stream),
+                          scene=True)
+
+    setUnityRefDir()

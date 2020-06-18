@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import maya.cmds as cmds
 import os
 import ui_manager as ui
@@ -10,6 +12,7 @@ fileModified = cmds.file(storage.scene, q=True, modified=True)
 
 # Manage the save process following the scene state
 def saveScene():
+    global fileExists
     if not fileExists:
         # The file has already a name
         if storage.scene != "":
@@ -34,7 +37,6 @@ def saveScene():
     elif fileModified:
         cmds.file(save=True)
 
-    global fileExists
     fileExists = True
 
 
@@ -82,19 +84,19 @@ def checkDuplication(scene):
     return True
 
 
-# Split transform nodes between meshes and groups
+# Split transform nodes between meshes and otherElement
 def splitTransform():
     storage.transformNodes = cmds.ls(sl=True, type="transform")
     for node in storage.transformNodes:
-        if utility.isGroup(node):
-            storage.groups.append(node)
+        if utility.isMesh(node):
+            storage.meshes.append(node)
 
         else:
-            storage.meshes.append(node)
+            storage.otherElement.append(node)
 
     print("transformNodes", storage.transformNodes)
     print("meshes", storage.meshes)
-    print("groups", storage.groups)
+    print("otherElement", storage.otherElement)
 
 
 # Rebuild normals
@@ -158,13 +160,14 @@ def checkNonManyfold():
         nue = cmds.polyInfo(mesh, nue=True)
         nuv = cmds.polyInfo(mesh, nuv=True)
         nmv = cmds.polyInfo(mesh, nmv=True)
-        print("nme", nme)
-        print("nmv", nmv)
-        print("nue", nue)
-        print("nuv", nuv)
 
         if nme is not None or nue is not None or nuv is not None or nmv is not None:
             probMesh.append(mesh)
+            print(mesh + ":")
+            print(" Non-manifold Edges", nme)
+            print(" Non-manifold Vertices", nmv)
+            print(" Non-manifold UV Edges", nue)
+            print(" Non-manifold UVs", nuv)
 
     if len(probMesh) > 0:
         for prob in probMesh:
@@ -237,7 +240,7 @@ def sanitizer():
     if not storage.values.selectionOnly:
         cmds.select(all=True, hierarchy=True)
 
-    # Splitting into meshes and groups
+    # Splitting into meshes and otherElement
     splitTransform()
 
     # Make sure that at least one mesh or group is selected
@@ -292,7 +295,7 @@ def sanitizer():
 
         checkNonManyfold()
 
-        # freeze transformations
+        # _freezeTransform transformations
         if storage.values.freezeTransform:
             if storage.values.displayInfo:
                 ui.info("Info", "The script is freezing the transformations of yourmeshes")

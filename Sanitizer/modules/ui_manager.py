@@ -1,11 +1,10 @@
+# coding=utf-8
+
 import maya.cmds as cmds
 import os
 import params
 from Sanitizer import storage
-
-"""
-MANAGE THE UI
-"""
+import utility
 
 
 def getRebuildOption():
@@ -24,16 +23,20 @@ def enableRebuildOption(value):
     enableCustomAngle(value)
 
 
+# Open file dialog to coose the reference directory
 def searchRefs(*args):
-    directory = cmds.fileDialog2(ds=2, fm=3, dir=storage.unityRefDir)[0]
+    directory = cmds.fileDialog2(ds=2, fm=3, dir=storage.unityRefDir)
     if directory is not None:
+        directory = directory[0]
         storage.unityRefDir = directory
         displayRefs(directory)
+        utility.setUnityRefDir()
         return
 
     info("Search reference", "No folder selected")
 
 
+# Searches 'obj' or 'fbx' references into the specified folder and displays it into the 'Sanitizer' window
 def displayRefs(refDir):
     if cmds.columnLayout("refContainer", q=True, exists=True):
         cmds.deleteUI("refContainer", layout=True)
@@ -68,6 +71,7 @@ def displayRefs(refDir):
     cmds.setParent('..')
 
 
+# Importe in open scene the selected reference
 def importRef(*args):
     ref = cmds.radioCollection("unityRefs", q=True, select=True)
     if ref != "NONE":
@@ -77,9 +81,11 @@ def importRef(*args):
         for node in importedNodes:
             cmds.select(node, add=True)
 
-    else: info("Import error", "You have to select an element to import")
+    else:
+        info("Import error", "You have to select an element to import")
 
 
+# Create the UI for the sanitizer
 def createWindow(name, callback):
     print('\nLancement du script\n')
 
@@ -94,6 +100,7 @@ def createWindow(name, callback):
     # GENERAL PANEL
     cmds.columnLayout("General", adj=False, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l="")
+    cmds.text(l="Manage general options", font="boldLabelFont")
     cmds.checkBox("freezeTransform", l="Freeze transformations", v=storage.values.freezeTransform)
     cmds.checkBox("deleteHistory", l="Delete history", v=storage.values.deleteHistory)
     cmds.checkBox("selectionOnly", l="Selection only", v=storage.values.selectionOnly)
@@ -105,6 +112,7 @@ def createWindow(name, callback):
     # NORMAL PANEL
     cmds.columnLayout("Normal", adj=False, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l="")
+    cmds.text(l="Manage normals options", font="boldLabelFont")
     cmds.checkBox("conformNormals", l="Conform normals", v=storage.values.conformNormals)
     cmds.checkBox("rebuildNormals", l="Rebuild normals", v=storage.values.rebuildNormals, cc=enableRebuildOption)
     cmds.text(label="")
@@ -122,6 +130,7 @@ def createWindow(name, callback):
     # PIVOT PANEL
     cmds.columnLayout("Pivot", adj=False, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l="")
+    cmds.text(l="Manage pivot options", font="boldLabelFont")
     cmds.text(label="Options:", align="left")
     cmds.radioButtonGrp("pivotOption",
                         labelArray4=['Untouched', 'Mesh center', 'Scene center', 'Base center'],
@@ -131,13 +140,16 @@ def createWindow(name, callback):
     cmds.text(l="")
     cmds.setParent('..')
 
-    # UITY PANEL
-    cmds.columnLayout("Unity", adj=True, columnOffset=["both", storage.inShelfOffset])
+    # REFERENCE PANEL
+    cmds.columnLayout("References", adj=False, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l="")
-    cmds.button(label="Search", c=searchRefs)
+    cmds.text(l="Search and import references", font="boldLabelFont")
     cmds.columnLayout("refWraper")
     cmds.setParent('..')
-    cmds.button('unityImportRef', l='Import reference', c=importRef)
+    cmds.rowLayout(adjustableColumn=2, numberOfColumns=2)
+    cmds.button(label="Search", c=searchRefs, w=150)
+    cmds.button('unityImportRef', l='Import reference', c=importRef, w=150)
+    cmds.setParent('..')
     cmds.text(l="")
     displayRefs(storage.unityRefDir)
     cmds.setParent('..')
@@ -162,10 +174,11 @@ def createWindow(name, callback):
 
 
 """
-CREATE CONFIRM MODAL WITH YES/NO BUTTONS
+CREATE MODAL
 """
 
 
+# Create confirm modal with 'Yes' / 'No' buttons
 def confirm(title, message):
     print("Display " + title + " confirm")
     res = cmds.confirmDialog(title=title,
@@ -185,11 +198,7 @@ def confirm(title, message):
         return False
 
 
-"""
-CREATE INFO MODAL
-"""
-
-
+# Create info modal with just an 'ok' button
 def info(title, message):
     cmds.confirmDialog(title=title,
                        message=message,

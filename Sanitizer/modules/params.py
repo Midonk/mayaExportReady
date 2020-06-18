@@ -1,10 +1,12 @@
+# coding=utf-8
+
 import maya.cmds as cmds
 import process
 from Sanitizer import storage
 import utility
 
 
-# Link params between UI and script
+# Links params between UI and script
 def getParams():
     storage.values.freezeTransform = cmds.checkBox("freezeTransform", q=True, v=True)
     storage.values.deleteHistory = cmds.checkBox("deleteHistory", q=True, v=True)

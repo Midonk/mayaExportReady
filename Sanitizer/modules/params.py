@@ -16,6 +16,7 @@ def getParams():
     storage.values.rebuildNormalOption = cmds.radioButtonGrp("rebuildNormalOption", q=True, select=True)
     storage.values.customNormalAngle = cmds.intField("customNormalAngle", q=True, v=True)
     storage.values.pivotOption = cmds.radioButtonGrp("pivotOption", q=True, select=True)
+    storage.values.exportResult = cmds.checkBox("exportResult", q=True, v=True)
     storage.values.cleanUpMesh = cmds.checkBox("cleanUpMesh", q=True, v=True)
     storage.values.checkNonManyfold = cmds.checkBox("checkNonManyfold", q=True, v=True)
     storage.values.alwaysOverrideExport = cmds.checkBox("alwaysOverrideExport", q=True, v=True)

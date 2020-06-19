@@ -12,6 +12,10 @@ streams = {"freezeTransform": "sanBoolStruct",
            "rebuildNormalOption": "sanIntStruct",
            "customNormalAngle": "sanIntStruct",
            "pivotOption": "sanIntStruct",
+           "exportResult": "sanBoolStruct",
+           "exportFolder": "sanStringStruct",
+           "exportExtension": "sanStringStruct",
+           "exportName": "sanStringStruct",
            "cleanUpMesh": "sanBoolStruct",
            "checkNonManyfold": "sanBoolStruct",
            "alwaysOverrideExport": "sanBoolStruct",
@@ -33,7 +37,7 @@ UI VARIABLES
 """
 
 inShelfOffset = 10
-shelfWidth = 323
+shelfWidth = 381
 globalColumnOffset = 5
 globalRowOffset = 15
 optionOffset = 10

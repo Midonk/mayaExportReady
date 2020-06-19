@@ -22,7 +22,8 @@ This script has been designed for game developpers but can also be really helpfu
 ## What the script does:
 - **Give a clear UI** allowing the user to manage the process options of the script
 - **Create an export duplication** of your scene to prevent destructive actions on your work scene
-- **Remind of your preceding options** making you gain time
+- **Remind of your preceding options** making you gain time <br>
+    NOTE: the script uses metadata that are generally saved when you launch the script.
 
 ## What the script can do:
 - **Freeze transformations** of all type of transform nodes

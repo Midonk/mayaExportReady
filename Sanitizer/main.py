@@ -27,9 +27,11 @@ def initialize():
 
     # retrieve metadata
     if cmds.hasMetadata(channelName='sanitizer', scene=True)[0]:
+        print("Retrieve metadata")
         storage.values = utility.Values()
         for stream in streamsName:
-            setattr(storage.values, stream, cmds.getMetadata(streamName=stream, index=0, scene=True)[0])
+            print(stream, cmds.hasMetadata(streamName=stream, channelName='sanitizer', scene=True))
+            setattr(storage.values, stream, cmds.getMetadata(streamName=stream, channelName='sanitizer', index=0, scene=True)[0])
 
         storage.unityRefDir = cmds.getMetadata(streamName="unityRefDir", index=0, scene=True)[0]
 

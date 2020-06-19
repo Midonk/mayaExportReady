@@ -286,30 +286,52 @@ def sanitizer():
         for mesh in storage.meshes:
             cmds.polyClean(mesh)
 
-    cmds.select(clear=True)
+    # _freezeTransform transformations
+    if storage.values.freezeTransform:
+        if storage.values.displayInfo:
+            ui.info("Info", "The script is freezing the transformations of yourmeshes")
+
+        for node in storage.transformNodes:
+            cmds.makeIdentity(node, apply=True, t=1, r=1, s=1, n=0)
+
+    # delete history
+    if storage.values.deleteHistory:
+        if storage.values.displayInfo:
+            ui.info("Info", "The script is deleting the history of your transformNodes")
+
+        for node in storage.transformNodes:
+            cmds.delete(node, constructionHistory=True)
+
+    if storage.values.exportResult:
+        # Check or create a destination directory
+        destDir = storage.values.exportFolder + sceneName
+        if not cmds.file(destDir, q=True, exists=True):
+            destDir = cmds.sysFile(destDir, makeDir=True)
+
+        if storage.values.displayInfo:
+            ui.info("Info",
+                    "The script export your scene as individual meshes and stores them into:\n" + "'" + destDir + "'")
+
+        # Export meshes
+        index = 0
+        for mesh in storage.meshes:
+            cmds.select(clear=True)
+            cmds.select(mesh, add=True)
+            # rename each mesh
+            exportName = sceneName if storage.values.exportName == "" else storage.values.exportName
+            cmds.file(rename=exportName + "_" + str(index))
+            cmds.file(exportSelected=True, type="FBX" if storage.values.exportExtension == "exportFbx" else "OBJ")
+            index += 1
+
+        cmds.file(rename=sceneName)
 
     # check non manyfold mesh
+    cmds.select(clear=True)
     if storage.values.checkNonManyfold:
         if storage.values.displayInfo:
             ui.info("Info", "The script is looking for non-manyfold transformNodes")
 
         checkNonManyfold()
-
-        # _freezeTransform transformations
-        if storage.values.freezeTransform:
-            if storage.values.displayInfo:
-                ui.info("Info", "The script is freezing the transformations of yourmeshes")
-
-            for node in storage.transformNodes:
-                cmds.makeIdentity(node, apply=True, t=1, r=1, s=1, n=0)
-
-        # delete history
-        if storage.values.deleteHistory:
-            if storage.values.displayInfo:
-                ui.info("Info", "The script is deleting the history of your transformNodes")
-
-            for node in storage.transformNodes:
-                cmds.delete(node, constructionHistory=True)
 
     cmds.undoInfo(cn="sanitizer", cck=True)
 

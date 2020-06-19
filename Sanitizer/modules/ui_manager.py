@@ -23,7 +23,16 @@ def enableRebuildOption(value):
     enableCustomAngle(value)
 
 
-# Open file dialog to coose the reference directory
+def onEnableExport(value):
+    cmds.button("exportFolderBrowserButton", e=True, enable=value)
+    cmds.textField("exportFolderInput", e=True, enable=value)
+    cmds.textField("exportNameInput", e=True, enable=value)
+    cmds.text("radioColExtentionLabel", e=True, enable=value)
+    cmds.radioButton("exportFbx", e=True, enable=value)
+    cmds.radioButton("exportObj", e=True, enable=value)
+
+
+# Open file dialog to choose the reference directory
 def searchRefs(*args):
     directory = cmds.fileDialog2(ds=2, fm=3, dir=storage.unityRefDir)
     if directory is not None:
@@ -34,6 +43,19 @@ def searchRefs(*args):
         return
 
     info("Search reference", "No folder selected")
+
+
+# Open file dialog to choose the export folder
+def searchExportFolder(*args):
+    directory = cmds.fileDialog2(ds=2, fm=2, dir=storage.values.exportFolder)
+    if directory is not None:
+        directory = directory[0]
+        storage.values.exportFolder = directory
+        utility.setExportFolder()
+        cmds.textField("exportFolderInput", e=True, text=directory)
+        return
+
+    info("Search export folder", "No folder selected")
 
 
 # Searches 'obj' or 'fbx' references into the specified folder and displays it into the 'Sanitizer' window
@@ -71,7 +93,7 @@ def displayRefs(refDir):
     cmds.setParent('..')
 
 
-# Importe in open scene the selected reference
+# Import in open scene the selected reference
 def importRef(*args):
     ref = cmds.radioCollection("unityRefs", q=True, select=True)
     if ref != "NONE":
@@ -83,6 +105,33 @@ def importRef(*args):
 
     else:
         info("Import error", "You have to select an element to import")
+
+
+# Check if the folder specified to the export folder, exists
+def checkExportFolder(path):
+    # Register the new export folder
+    if cmds.file(path, q=True, exists=True):
+        storage.values.exportFolder = path
+        utility.setExportFolder()
+        cmds.textField("exportFolderInput", e=True, text=path)
+
+    # Reset the export folder by the saved one
+    else:
+        cmds.textField("exportFolderInput", e=True, text=storage.values.exportFolder)
+
+
+def onFbxExtension(value):
+    storage.values.exportExtension = "exportFbx"
+    utility.setExportExtension()
+
+
+def onObjExtension(value):
+    storage.values.exportExtension = "exportObj"
+    utility.setExportExtension()
+
+def updateExportName(name):
+    storage.values.exportName = name
+    utility.setExportName()
 
 
 # Create the UI for the sanitizer
@@ -99,8 +148,8 @@ def createWindow(name, callback):
 
     # GENERAL PANEL
     cmds.columnLayout("General", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l='<span style="font-size:18px">Manage general options</span>', font="boldLabelFont")
     cmds.text(l="")
-    cmds.text(l="Manage general options", font="boldLabelFont")
     cmds.checkBox("freezeTransform", l="Freeze transformations", v=storage.values.freezeTransform)
     cmds.checkBox("deleteHistory", l="Delete history", v=storage.values.deleteHistory)
     cmds.checkBox("selectionOnly", l="Selection only", v=storage.values.selectionOnly)
@@ -111,8 +160,8 @@ def createWindow(name, callback):
 
     # NORMAL PANEL
     cmds.columnLayout("Normal", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l='<span style="font-size:18px">Manage normals options</span>', font="boldLabelFont")
     cmds.text(l="")
-    cmds.text(l="Manage normals options", font="boldLabelFont")
     cmds.checkBox("conformNormals", l="Conform normals", v=storage.values.conformNormals)
     cmds.checkBox("rebuildNormals", l="Rebuild normals", v=storage.values.rebuildNormals, cc=enableRebuildOption)
     cmds.text(label="")
@@ -129,8 +178,8 @@ def createWindow(name, callback):
 
     # PIVOT PANEL
     cmds.columnLayout("Pivot", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l='<span style="font-size:18px">Manage pivot options</span>', font="boldLabelFont")
     cmds.text(l="")
-    cmds.text(l="Manage pivot options", font="boldLabelFont")
     cmds.text(label="Options:", align="left")
     cmds.radioButtonGrp("pivotOption",
                         labelArray4=['Untouched', 'Mesh center', 'Scene center', 'Base center'],
@@ -140,10 +189,33 @@ def createWindow(name, callback):
     cmds.text(l="")
     cmds.setParent('..')
 
+    # EXPORT PANEL
+    cmds.columnLayout("Export", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l='<span style="font-size:18px">Export settings</span>', font="boldLabelFont")
+    cmds.text(l="")
+    cmds.checkBox("exportResult", l="Export result", v=storage.values.exportResult, cc=onEnableExport)
+    cmds.rowLayout(adjustableColumn=2, numberOfColumns=2)
+    cmds.textField("exportFolderInput", fi=storage.values.exportFolder, w=300, h=26, cc=checkExportFolder)
+    cmds.button("exportFolderBrowserButton", l="Browse", c=searchExportFolder)
+    cmds.setParent('..')
+    cmds.text(l="")
+    cmds.text(l="Mesh name")
+    cmds.textField("exportNameInput", text=storage.values.exportName, w=351, h=26, cc=updateExportName)
+    cmds.radioCollection("exportExtension")
+    cmds.text(l="")
+    cmds.text("radioColExtentionLabel", l="Export as")
+    cmds.radioButton("exportFbx", l="FBX", onCommand=onFbxExtension)
+    cmds.radioButton("exportObj", l="OBJ", onCommand=onObjExtension)
+    cmds.radioCollection("exportExtension", e=True, select=storage.values.exportExtension)
+
+    onEnableExport(cmds.checkBox("exportResult", q=True, v=True))
+    cmds.text(l="")
+    cmds.setParent('..')
+
+
     # REFERENCE PANEL
     cmds.columnLayout("References", adj=False, columnOffset=["both", storage.inShelfOffset])
-    cmds.text(l="")
-    cmds.text(l="Search and import references", font="boldLabelFont")
+    cmds.text(l='<span style="font-size:18px">Search and import references</span>', font="boldLabelFont")
     cmds.columnLayout("refWraper")
     cmds.setParent('..')
     cmds.rowLayout(adjustableColumn=2, numberOfColumns=2)
@@ -156,6 +228,7 @@ def createWindow(name, callback):
 
     # SETTINGS PANEL
     cmds.columnLayout("Settings", adj=False, columnOffset=["both", storage.inShelfOffset])
+    cmds.text(l='<span style="font-size:18px">Manage the settings</span>', font="boldLabelFont")
     cmds.text(l="")
     cmds.checkBox("alwaysOverrideExport", l="Override existing export file", v=storage.values.alwaysOverrideExport)
     cmds.checkBox("displayInfo", l="Display informations", v=storage.values.displayInfo)

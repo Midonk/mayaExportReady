@@ -31,7 +31,8 @@ class Values:
     def __init__(self, _freezeTransform=True, _deleteHistory=True, _selectionOnly=False, _conformNormals=True,
                  _rebuildNormals=True, _rebuildNormalOption=1,
                  _customNormalAngle=60, _pivotOption=1, _exportResult=False, _exportFolder=None, _exportExtension=None,
-                 _exportName=None, _cleanUpMesh=True, _checkNonManyfold=True, _alwaysOverrideExport=False,
+                 _exportName=None, _unityRefDir=None, _cleanUpMesh=True, _checkNonManyfold=True,
+                 _alwaysOverrideExport=False,
                  _displayInfo=False):
         self.freezeTransform = _freezeTransform
         self.deleteHistory = _deleteHistory
@@ -44,9 +45,11 @@ class Values:
         self.exportResult = _exportResult
         scenePath = cmds.file(q=True, sn=True)
         self.exportFolder = _exportFolder or os.path.dirname(
-            os.path.dirname(cmds.about(env=True))) if scenePath == "" else scenePath
+            os.path.dirname(cmds.about(env=True))) if scenePath == "" else os.path.dirname(scenePath)
         self.exportExtension = _exportExtension or "exportFbx"
-        self.exportName = _exportName or "myMesh"
+        self.exportName = _exportName or "myExportFolder"
+        self.unityRefDir = _unityRefDir or os.path.join(os.path.dirname(os.path.dirname(cmds.about(env=True))),
+                                                        "scripts/Sanitizer/Refs")
         self.cleanUpMesh = _cleanUpMesh
         self.checkNonManyfold = _checkNonManyfold
         self.alwaysOverrideExport = _alwaysOverrideExport
@@ -56,7 +59,8 @@ class Values:
 
 # Update unityRef directory in metadata
 def setUnityRefDir():
-    cmds.editMetadata(streamName='unityRefDir', channelName='sanitizer', index=0, stringValue=storage.unityRefDir,
+    cmds.editMetadata(streamName='unityRefDir', channelName='sanitizer', index=0,
+                      stringValue=storage.values.unityRefDir,
                       scene=True)
 
 
@@ -84,12 +88,10 @@ def setAllMetadata():
         print(stream, getattr(storage.values, stream))
         if storage.streams[stream] == "sanStringStruct":
             cmds.editMetadata(streamName=stream, channelName='sanitizer', index=0,
-                              stringValue=storage.values.exportFolder,
+                              stringValue=getattr(storage.values, stream),
                               scene=True)
 
         else:
             cmds.editMetadata(streamName=stream, channelName='sanitizer', index=0,
                               value=getattr(storage.values, stream),
                               scene=True)
-
-    setUnityRefDir()

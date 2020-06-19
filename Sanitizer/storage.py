@@ -16,6 +16,7 @@ streams = {"freezeTransform": "sanBoolStruct",
            "exportFolder": "sanStringStruct",
            "exportExtension": "sanStringStruct",
            "exportName": "sanStringStruct",
+           "unityRefDir": "sanStringStruct",
            "cleanUpMesh": "sanBoolStruct",
            "checkNonManyfold": "sanBoolStruct",
            "alwaysOverrideExport": "sanBoolStruct",
@@ -43,5 +44,4 @@ globalRowOffset = 15
 optionOffset = 10
 titleHeight = 18
 
-unityRefDir = ""
 unityRefs = {}

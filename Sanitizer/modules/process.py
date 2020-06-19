@@ -26,7 +26,7 @@ def saveScene():
                 sceneName = os.path.splitext(storage.scene)[0]
                 storage.scene = cmds.file(scene, rename=sceneName + '.ma')
                 cmds.file(save=True, type='mayaAscii')
-                print("scene saved as", storage.scene)
+                print("scene saved as" + storage.scene)
 
             # The user canceled the dialog
             else:
@@ -188,6 +188,16 @@ def sanitizer():
         ui.info("Info",
                 "The script will nowproceed through several operations, as you parametered it in the preceding window")
 
+    # Getting all transformNodes needed
+    if storage.values.displayInfo:
+        ui.info("Info", "The script gather all the transformNodes of the scene to prepare them to the export")
+
+    if not storage.values.selectionOnly:
+        cmds.select(all=True, hierarchy=True)
+
+    # Splitting into meshes and otherElement
+    splitTransform()
+
     # """""""""""""
 
     #  CHECK FILES
@@ -232,16 +242,6 @@ def sanitizer():
     #  PREPARE THE PROCESS
 
     # """""""""""""""""""""
-
-    # Getting all transformNodes needed
-    if storage.values.displayInfo:
-        ui.info("Info", "The script gather all the transformNodes of the scene to prepare them to the export")
-
-    if not storage.values.selectionOnly:
-        cmds.select(all=True, hierarchy=True)
-
-    # Splitting into meshes and otherElement
-    splitTransform()
 
     # Make sure that at least one mesh or group is selected
     if len(storage.transformNodes) == 0:
@@ -289,7 +289,7 @@ def sanitizer():
     # _freezeTransform transformations
     if storage.values.freezeTransform:
         if storage.values.displayInfo:
-            ui.info("Info", "The script is freezing the transformations of yourmeshes")
+            ui.info("Info", "The script is freezing the transformations of your meshes")
 
         for node in storage.transformNodes:
             cmds.makeIdentity(node, apply=True, t=1, r=1, s=1, n=0)
@@ -302,28 +302,27 @@ def sanitizer():
         for node in storage.transformNodes:
             cmds.delete(node, constructionHistory=True)
 
+    # export meshes
     if storage.values.exportResult:
         # Check or create a destination directory
-        destDir = storage.values.exportFolder + sceneName
+        destDir = storage.values.exportFolder + "\\" + (sceneName if storage.values.exportName == "" else storage.values.exportName)
+
         if not cmds.file(destDir, q=True, exists=True):
-            destDir = cmds.sysFile(destDir, makeDir=True)
+            cmds.sysFile(destDir, makeDir=True)
 
         if storage.values.displayInfo:
             ui.info("Info",
                     "The script export your scene as individual meshes and stores them into:\n" + "'" + destDir + "'")
 
         # Export meshes
-        index = 0
         for mesh in storage.meshes:
             cmds.select(clear=True)
             cmds.select(mesh, add=True)
-            # rename each mesh
-            exportName = sceneName if storage.values.exportName == "" else storage.values.exportName
-            cmds.file(rename=exportName + "_" + str(index))
-            cmds.file(exportSelected=True, type="FBX" if storage.values.exportExtension == "exportFbx" else "OBJ")
-            index += 1
+            if storage.values.exportExtension == "exportFbx":
+                cmds.file(destDir + "\\" + mesh, force = True, options = "v = 0", type = "FBX export", exportSelected = True)
 
-        cmds.file(rename=sceneName)
+            else:
+                print("WOOOOOPS. This format has not been implemented yet ¯\_(ツ)_/¯")
 
     # check non manyfold mesh
     cmds.select(clear=True)

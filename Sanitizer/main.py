@@ -24,38 +24,46 @@ def reloadAll():
 # or create them if they doesn't exists and initialize them
 def initialize():
     streamsName = storage.streams.keys()
-
-    # retrieve metadata
-    if cmds.hasMetadata(channelName='sanitizer', scene=True)[0]:
-        print("Retrieve metadata")
-        storage.values = utility.Values()
-        for stream in streamsName:
-            print(stream, cmds.hasMetadata(streamName=stream, channelName='sanitizer', scene=True))
-            setattr(storage.values, stream, cmds.getMetadata(streamName=stream, channelName='sanitizer', index=0, scene=True)[0])
-
-        storage.unityRefDir = cmds.getMetadata(streamName="unityRefDir", index=0, scene=True)[0]
-
-    # create metadata
-    else:
-        print("Creation of metadata")
+    storage.values = utility.Values()
+    # Check for datastructure statements
+    datastructures = cmds.dataStructure(q=True)
+    if not "sanBoolStruct" in datastructures:
+        print("Create sanBoolStruct")
         cmds.dataStructure(format='raw', asString='name=sanBoolStruct:bool=value')
+    if not "sanIntStruct" in datastructures:
+        print("Create sanIntStruct")
         cmds.dataStructure(format='raw', asString='name=sanIntStruct:int32=value')
+    if not "sanStringStruct" in datastructures:
+        print("Create sanStringStruct")
         cmds.dataStructure(format='raw', asString='name=sanStringStruct:string=value')
 
+    if not cmds.hasMetadata(channelName='sanitizer', scene=True)[0]:
+        print("Creation of the metadata")
         for stream in streamsName:
+            # create
             cmds.addMetadata(structure=storage.streams[stream],
                              streamName=stream,
                              channelName='sanitizer',
                              scene=True)
 
-        cmds.addMetadata(structure="sanStringStruct",
-                         streamName="unityRefDir",
-                         channelName='sanitizer',
-                         scene=True)
+    else:
+        print("Retrieve the metadata")
+        # Retrieve or create
+        print("Read streams")
+        for stream in streamsName:
+            # create
+            if not cmds.hasMetadata(streamName=stream, channelName='sanitizer', scene=True)[0]:
+                print(stream + " => create")
+                cmds.addMetadata(structure=storage.streams[stream],
+                                 streamName=stream,
+                                 channelName='sanitizer',
+                                 scene=True)
 
-        storage.values = utility.Values()
-        storage.unityRefDir = os.path.join(os.path.dirname(os.path.dirname(cmds.about(env=True))),
-                                           "scripts/Sanitizer/Refs")
+            # retrieve
+            else:
+                setattr(storage.values, stream,
+                        cmds.getMetadata(streamName=stream, channelName='sanitizer', index=0, scene=True)[0])
+                print(stream + " " + str(getattr(storage.values, stream)) + " => exists")
 
     # Apply metadata values on the scene
     utility.setAllMetadata()

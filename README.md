@@ -17,13 +17,13 @@ This script has been designed for game developpers but can also be really helpfu
 1. Press **CTRL + Enter**
 1. Click on the button in the new shelf that just appears names "Sanitizer"
 
-┏(＾0＾)┛ You are done (~‾▿‾)~
+┏(＾0＾)┛ **You are done** (~‾▿‾)~
 
 ## What the script does:
 - **Give a clear UI** allowing the user to manage the process options of the script
 - **Create an export duplication** of your scene to prevent destructive actions on your work scene
 - **Remind of your preceding options** making you gain time <br>
-    NOTE: the script uses metadata that are generally saved when you launch the script.
+    *NOTE: the script uses metadata that are generally saved when you launch the script.*
 
 ## What the script can do:
 - **Freeze transformations** of all type of transform nodes
@@ -34,6 +34,7 @@ This script has been designed for game developpers but can also be really helpfu
 - **Conform normals** of your meshes
 - **Rebuild normals** of your meshes with given angles
 - **Relocalize your pivot**
+- **Export the result** of the process as FBX or OBJ
 - **Search and import reference** meshes directly into your scene
 - **Display informations** about the script process
 

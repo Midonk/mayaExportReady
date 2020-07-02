@@ -7,9 +7,9 @@ from Sanitizer import storage
 import utility
 
 
-
 def getRebuildOption():
-    return cmds.radioButtonGrp("rebuildNormalOption", q=True, select=True) == 3
+    return cmds.radioButtonGrp("rebuildNormalOption", q=True, select=True) == 3 and cmds.checkBox("rebuildNormals",
+                                                                                                  q=True, v=True)
 
 
 def enableCustomAngle(value):
@@ -25,11 +25,13 @@ def enableRebuildOption(value):
 
 
 def onEnableExport(value):
+    cmds.checkBox("exportAsOneObject", e=True, enable=value)
     cmds.button("exportFolderBrowserButton", e=True, enable=value)
     cmds.textField("exportFolderInput", e=True, enable=value)
     cmds.textField("exportNameInput", e=True, enable=value)
     cmds.text("radioColExtentionLabel", e=True, enable=value)
     cmds.text("exportNameLabel", e=True, enable=value)
+    cmds.text("exportFolderInput", e=True, enable=value)
     cmds.radioButton("exportFbx", e=True, enable=value)
     cmds.radioButton("exportObj", e=True, enable=value)
 
@@ -60,6 +62,30 @@ def searchExportFolder(*args):
     info("Search export folder", "No folder selected")
 
 
+# Store references into the storage with formated names
+# and create the apropriate layout
+def refStorage(refs):
+    if len(refs) > 0:
+        cmds.text(l="")
+        cmds.text(l="FBX:")
+        if len(refs) > 7:
+            cmds.scrollLayout(
+                horizontalScrollBarThickness=16, borderVisible=True,
+                verticalScrollBarThickness=16, height=150, width=storage.scrollRefWidth)
+
+        for ref in refs:
+            refName, refExt = os.path.splitext(ref)
+            refExt = refExt.replace(".", "")
+            cmds.radioButton(refName + "_" + refExt, l=refName)
+            # format reference name to make easier imports
+            modifiedRefName = refName.replace(" ", "_")
+            modifiedRefName = modifiedRefName.replace("-", "_")
+            storage.unityRefs[modifiedRefName + "_" + refExt] = [refName, refExt]
+
+        if len(refs) > 7:
+            cmds.setParent("..")
+
+
 # Searches 'obj' or 'fbx' references into the specified folder and displays it into the 'Sanitizer' window
 def displayRefs(refDir):
     if cmds.columnLayout("refContainer", q=True, exists=True):
@@ -72,23 +98,8 @@ def displayRefs(refDir):
     refObj = cmds.getFileList(folder=refDir, filespec="*.obj") or []
     cmds.button('unityImportRef', e=True, enable=len(refFbx) > 0 or len(refObj))
 
-    if len(refFbx) > 0:
-        cmds.text(l="")
-        cmds.text(l="FBX:")
-
-    for ref in refFbx:
-        refName, refExt = os.path.splitext(ref)
-        storage.unityRefs[refName] = refExt
-        cmds.radioButton(refName, l=refName)
-
-    if len(refObj) > 0:
-        cmds.text(l="")
-        cmds.text(l="OBJ:")
-
-    for ref in refObj:
-        refName, refExt = os.path.splitext(ref)
-        storage.unityRefs[refName] = refExt
-        cmds.radioButton(os.path.basename(ref), l=os.path.splitext(ref)[0])
+    refStorage(refFbx)
+    refStorage(refObj)
 
     cmds.text(l="")
     cmds.setParent('..')
@@ -97,9 +108,10 @@ def displayRefs(refDir):
 
 # Import in open scene the selected reference
 def importRef(*args):
-    ref = cmds.radioCollection("unityRefs", q=True, select=True)
-    if ref != "NONE":
-        path = os.path.join(storage.values.unityRefDir, ref + storage.unityRefs[ref])
+    refController = cmds.radioCollection("unityRefs", q=True, select=True)
+    if refController != "NONE":
+        path = os.path.join(storage.values.unityRefDir,
+                            storage.unityRefs[refController][0] + "." + storage.unityRefs[refController][1])
         importedNodes = cmds.file(path, i=True, mergeNamespacesOnClash=True, returnNewNodes=True)
         cmds.select(clear=True)
         for node in importedNodes:
@@ -113,6 +125,7 @@ def importRef(*args):
 def checkExportFolder(path):
     # Register the new export folder
     if cmds.file(path, q=True, exists=True):
+        print("in check export folder", path)
         storage.values.exportFolder = path
         utility.setExportFolder()
         cmds.textField("exportFolderInput", e=True, text=path)
@@ -131,15 +144,44 @@ def onObjExtension(value):
     storage.values.exportExtension = "exportObj"
     utility.setExportExtension()
 
+
 def updateExportName(name):
     storage.values.exportName = name
     utility.setExportName()
 
 
+def updateExportNameLabel(value):
+    label = ""
+    if value:
+        label = "Object name:"
+        cmds.text("exportNameLabel", e=True, l=label)
+
+    else:
+        label = "Destination folder name:"
+        cmds.text("exportNameLabel", e=True, l=label)
+
+    return label
+
+
+def savePreferences(*args):
+    params.getParams()
+    settings = utility.JsonUtility.createJsonData()
+    utility.JsonUtility.write(storage.prefsFile, settings)
+    utility.setAllMetadata()
+
+
+def resetToPrefs(*args):
+    streamsName = storage.streams.keys()
+    prefs = utility.JsonUtility.read(storage.prefsFile)
+    for stream in streamsName:
+        setattr(storage.values, stream, prefs[stream])
+
+    cmds.deleteUI("sanitizer")
+    storage.values.win = createWindow("Sanitizer", lambda command: params.launchScript())
+
+
 # Create the UI for the sanitizer
 def createWindow(name, callback):
-    print('\nLancement du script\n')
-
     # check if the window exists already
     if cmds.window("sanitizer", exists=True):
         cmds.deleteUI("sanitizer")
@@ -195,15 +237,20 @@ def createWindow(name, callback):
     cmds.text(l='<span style="font-size:18px">Export settings</span>', font="boldLabelFont")
     cmds.text(l="")
     cmds.checkBox("exportResult", l="Export result", v=storage.values.exportResult, cc=onEnableExport)
+    cmds.checkBox("exportAsOneObject", l="Export as one object", v=storage.values.exportAsOneObject,
+                  cc=updateExportNameLabel)
+    cmds.text(l="")
+    cmds.text("exportFolderInput", l="Export path:")
     cmds.rowLayout(adjustableColumn=2, numberOfColumns=2)
     cmds.textField("exportFolderInput", fi=storage.values.exportFolder, w=300, h=26, cc=checkExportFolder)
     cmds.button("exportFolderBrowserButton", l="Browse", c=searchExportFolder)
     cmds.setParent('..')
     cmds.text(l="")
-    cmds.text("exportNameLabel", l="Destination folder name:")
-    cmds.textField("exportNameInput", text=storage.values.exportName, w=351, h=26, cc=updateExportName)
-    cmds.radioCollection("exportExtension")
+    cmds.text("exportNameLabel", l="")
+    cmds.text("exportNameLabel", e=True, l=updateExportNameLabel(storage.values.exportAsOneObject))
+    cmds.textField("exportNameInput", text=storage.values.exportName, w=351, h=26, cc=updateExportName, pht=os.path.splitext(os.path.basename(cmds.file(q=True, sn=True)))[0])
     cmds.text(l="")
+    cmds.radioCollection("exportExtension")
     cmds.text("radioColExtentionLabel", l="Export as")
     cmds.radioButton("exportFbx", l="FBX", onCommand=onFbxExtension)
     cmds.radioButton("exportObj", l="OBJ", onCommand=onObjExtension)
@@ -212,7 +259,6 @@ def createWindow(name, callback):
     onEnableExport(cmds.checkBox("exportResult", q=True, v=True))
     cmds.text(l="")
     cmds.setParent('..')
-
 
     # REFERENCE PANEL
     cmds.columnLayout("References", adj=False, columnOffset=["both", storage.inShelfOffset])
@@ -232,7 +278,13 @@ def createWindow(name, callback):
     cmds.text(l='<span style="font-size:18px">Settings options</span>', font="boldLabelFont")
     cmds.text(l="")
     cmds.checkBox("alwaysOverrideExport", l="Override existing export file", v=storage.values.alwaysOverrideExport)
+    cmds.checkBox("stayInScene", l="Stay in active scene", v=storage.values.stayInScene)
     cmds.checkBox("displayInfo", l="Display informations", v=storage.values.displayInfo)
+    cmds.text(l="")
+    cmds.text(l="Preferences:")
+    cmds.button("saveAsPrefs", l="Save settings", c=savePreferences, w=125)
+    cmds.text(l="")
+    cmds.button("resetToPrefs", l="Reset to preferences", c=resetToPrefs, w=125)
     cmds.text(l="")
 
     cmds.setParent('|')

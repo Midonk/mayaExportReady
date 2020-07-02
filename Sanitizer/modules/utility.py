@@ -3,6 +3,7 @@
 import maya.cmds as cmds
 from Sanitizer import storage
 import os
+import json
 
 
 # Determine wether a transform is a group or not
@@ -19,20 +20,15 @@ def isMesh(node):
 
     return False
 
-    # children = cmds.listRelatives(element, children=True)
-    # for child in children:
-    #     if not cmds.ls(child, transforms=True):
-    #         return False
-    # return True
-
 
 # The value object
 class Values:
     def __init__(self, _freezeTransform=True, _deleteHistory=True, _selectionOnly=False, _conformNormals=True,
                  _rebuildNormals=True, _rebuildNormalOption=1,
-                 _customNormalAngle=60, _pivotOption=1, _exportResult=False, _exportFolder=None, _exportExtension=None,
+                 _customNormalAngle=60, _pivotOption=1, _exportResult=False, _exportFolder=None,
+                 _exportAsOneObject=False, _exportExtension=None,
                  _exportName=None, _unityRefDir=None, _cleanUpMesh=True, _checkNonManyfold=True,
-                 _alwaysOverrideExport=False,
+                 _alwaysOverrideExport=True, _stayInScene=True,
                  _displayInfo=False):
         self.freezeTransform = _freezeTransform
         self.deleteHistory = _deleteHistory
@@ -43,16 +39,17 @@ class Values:
         self.customNormalAngle = _customNormalAngle
         self.pivotOption = _pivotOption
         self.exportResult = _exportResult
-        scenePath = cmds.file(q=True, sn=True)
+        sceneDir = os.path.dirname(cmds.file(q=True, sn=True))
         self.exportFolder = _exportFolder or os.path.dirname(
-            os.path.dirname(cmds.about(env=True))) if scenePath == "" else os.path.dirname(scenePath)
+            os.path.dirname(cmds.about(env=True))) if sceneDir == "" else sceneDir
+        self.exportAsOneObject = _exportAsOneObject
         self.exportExtension = _exportExtension or "exportFbx"
         self.exportName = _exportName or "myExportFolder"
-        self.unityRefDir = _unityRefDir or os.path.join(os.path.dirname(os.path.dirname(cmds.about(env=True))),
-                                                        "scripts/Sanitizer/Refs")
+        self.unityRefDir = _unityRefDir or os.path.join(os.path.dirname(os.path.dirname(__file__)), "Refs")
         self.cleanUpMesh = _cleanUpMesh
         self.checkNonManyfold = _checkNonManyfold
         self.alwaysOverrideExport = _alwaysOverrideExport
+        self.stayInScene = _stayInScene
         self.displayInfo = _displayInfo
         self.win = None
 
@@ -85,7 +82,7 @@ def setExportName():
 def setAllMetadata():
     print("Saving ALL metadata")
     for stream in storage.streams.keys():
-        print(stream, getattr(storage.values, stream))
+        # print(stream, getattr(storage.values, stream))
         if storage.streams[stream] == "sanStringStruct":
             cmds.editMetadata(streamName=stream, channelName='sanitizer', index=0,
                               stringValue=getattr(storage.values, stream),
@@ -95,3 +92,45 @@ def setAllMetadata():
             cmds.editMetadata(streamName=stream, channelName='sanitizer', index=0,
                               value=getattr(storage.values, stream),
                               scene=True)
+
+
+class JsonUtility():
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def createJsonData():
+        return {
+            "freezeTransform": storage.values.freezeTransform,
+            "deleteHistory": storage.values.deleteHistory,
+            "selectionOnly": storage.values.selectionOnly,
+            "conformNormals": storage.values.conformNormals,
+            "rebuildNormals": storage.values.rebuildNormals,
+            "rebuildNormalOption": storage.values.rebuildNormalOption,
+            "customNormalAngle": storage.values.customNormalAngle,
+            "pivotOption": storage.values.pivotOption,
+            "exportResult": storage.values.exportResult,
+            "exportFolder": storage.values.exportFolder,
+            "exportAsOneObject": storage.values.exportAsOneObject,
+            "exportExtension": storage.values.exportExtension,
+            "exportName": storage.values.exportName,
+            "unityRefDir": storage.values.unityRefDir,
+            "cleanUpMesh": storage.values.cleanUpMesh,
+            "checkNonManyfold": storage.values.checkNonManyfold,
+            "alwaysOverrideExport": storage.values.alwaysOverrideExport,
+            "stayInScene": storage.values.stayInScene,
+            "displayInfo": storage.values.displayInfo,
+        }
+
+    @staticmethod
+    def read(path):
+        with open(path, "r") as file:
+            # read
+            data = file.read()
+            # parse
+            return json.loads(data)
+
+    @staticmethod
+    def write(path, data):
+        with open(path, 'w') as file:
+            json.dump(data, file, indent=4)

@@ -22,8 +22,9 @@ This script has been designed for game developpers but can also be really helpfu
 ## What the script does:
 - **Give a clear UI** allowing the user to manage the process options of the script
 - **Create an export duplication** of your scene to prevent destructive actions on your work scene
-- **Remind of your preceding options** making you gain time <br>
+- **Remind of your preceding options** per scenes making you gain time <br>
     *NOTE: the script uses metadata that are generally saved when you launch the script.*
+- You can **save your settings as preferences** to make your own settings as the default ones in every projects
 
 ## What the script can do:
 - **Freeze transformations** of all type of transform nodes
@@ -35,15 +36,6 @@ This script has been designed for game developpers but can also be really helpfu
 - **Rebuild normals** of your meshes with given angles
 - **Relocalize your pivot**
 - **Export the result** of the process as FBX or OBJ
+- **Export your scene or selection as one** file
 - **Search and import reference** meshes directly into your scene
 - **Display informations** about the script process
-
-# mayaToUnityReady
-
-
-- check obj & fbx plugins are activated 
-```python
-cmds.pluginInfo("name", ...)
-``` 
-
-- progress bar

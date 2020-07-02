@@ -1,4 +1,5 @@
 # coding=utf-8
+import os
 
 """
 PROCESS NEEDED VALUES
@@ -13,6 +14,7 @@ streams = {"freezeTransform": "sanBoolStruct",
            "customNormalAngle": "sanIntStruct",
            "pivotOption": "sanIntStruct",
            "exportResult": "sanBoolStruct",
+           "exportAsOneObject": "sanBoolStruct",
            "exportFolder": "sanStringStruct",
            "exportExtension": "sanStringStruct",
            "exportName": "sanStringStruct",
@@ -20,6 +22,7 @@ streams = {"freezeTransform": "sanBoolStruct",
            "cleanUpMesh": "sanBoolStruct",
            "checkNonManyfold": "sanBoolStruct",
            "alwaysOverrideExport": "sanBoolStruct",
+           "stayInScene": "sanBoolStruct",
            "displayInfo": "sanBoolStruct"}
 
 # Expecting Value object
@@ -43,5 +46,7 @@ globalColumnOffset = 5
 globalRowOffset = 15
 optionOffset = 10
 titleHeight = 18
+scrollRefWidth = 350
 
 unityRefs = {}
+prefsFile = os.path.join(os.path.dirname(__file__), "Prefs.json")

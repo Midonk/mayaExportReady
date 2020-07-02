@@ -6,6 +6,17 @@ from Sanitizer import storage
 import utility
 
 
+def launchScript():
+    getParams()
+
+    # update all metadata
+    utility.setAllMetadata()
+
+    cmds.deleteUI("sanitizer")
+    # launch the process
+    process.sanitizer()
+
+
 # Links params between UI and script
 def getParams():
     storage.values.freezeTransform = cmds.checkBox("freezeTransform", q=True, v=True)
@@ -17,14 +28,14 @@ def getParams():
     storage.values.customNormalAngle = cmds.intField("customNormalAngle", q=True, v=True)
     storage.values.pivotOption = cmds.radioButtonGrp("pivotOption", q=True, select=True)
     storage.values.exportResult = cmds.checkBox("exportResult", q=True, v=True)
+    storage.values.exportAsOneObject = cmds.checkBox("exportAsOneObject", q=True, v=True)
     storage.values.cleanUpMesh = cmds.checkBox("cleanUpMesh", q=True, v=True)
+
+    storage.values.exportFolder = cmds.textField("exportFolderInput", q=True, text=True)
+    storage.values.exportExtension = cmds.radioCollection("exportExtension", q=True, sl=True)
+    storage.values.exportName = cmds.textField("exportNameInput", q=True, text=True)
+
     storage.values.checkNonManyfold = cmds.checkBox("checkNonManyfold", q=True, v=True)
     storage.values.alwaysOverrideExport = cmds.checkBox("alwaysOverrideExport", q=True, v=True)
+    storage.values.stayInScene = cmds.checkBox("stayInScene", q=True, v=True)
     storage.values.displayInfo = cmds.checkBox("displayInfo", q=True, v=True)
-
-    # update all metadata
-    utility.setAllMetadata()
-
-    cmds.deleteUI("sanitizer")
-    # launch the process
-    process.sanitizer()

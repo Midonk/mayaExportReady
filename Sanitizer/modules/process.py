@@ -85,18 +85,19 @@ def checkDuplication(scene):
 
 
 # Split transform nodes between meshes and otherElement
-def splitTransform():
-    storage.transformNodes = cmds.ls(sl=True, type="transform")
-    for node in storage.transformNodes:
-        if utility.isMesh(node):
-            storage.meshes.append(node)
+def splitTransform(transformNodes):
+    for node in transformNodes:
+        if cmds.objExists(node):
+            storage.transformNodes.append(node)
+            if utility.isMesh(node):
+                storage.meshes.append(node)
 
-        else:
-            storage.otherElement.append(node)
+            else:
+                storage.otherElement.append(node)
 
-    print("transformNodes", storage.transformNodes)
-    print("meshes", storage.meshes)
-    print("otherElement", storage.otherElement)
+    # print("transformNodes", storage.transformNodes)
+    # print("meshes", storage.meshes)
+    # print("otherElement", storage.otherElement)
 
 
 # Rebuild normals
@@ -176,27 +177,67 @@ def checkNonManyfold():
         ui.info("Non-manyfold transformNodes", "Problematic transformNodes have been seleted")
 
 
+def exportObjects(destDir, name, asOne=False):
+    if storage.values.exportExtension == "exportFbx":
+        cmds.loadPlugin('fbxmaya.mll', quiet=True)
+        cmds.file(destDir + "\\" + name, force=True, options="v = 0", type="FBX export", exportAll=asOne,
+                  exportSelected=not asOne)
+
+    else:
+        cmds.loadPlugin('objExport.mll', quiet=True)
+        cmds.file(destDir + "\\" + name, force=True, type="OBJexport", exportSelected=not asOne, exportAll=asOne)
+
+
+def exportMeshes(defaultName, customName):
+    # base destDir
+    destDir = storage.values.exportFolder
+    generatedElement = defaultName if customName == "" else customName
+    # create folder if there are multiple elements
+    if not storage.values.exportAsOneObject:
+        destDir += "\\" + generatedElement
+
+        if not cmds.file(destDir, q=True, exists=True):
+            cmds.sysFile(destDir, makeDir=True)
+
+    if storage.values.displayInfo:
+        ui.info("Info",
+                "The script export your scene as individual meshes and stores them into:\n" + "'" + destDir + "'")
+
+    # Export meshes
+    if not storage.values.exportAsOneObject:
+        for mesh in storage.meshes:
+            cmds.select(clear=True)
+            cmds.select(mesh, add=True)
+            exportObjects(destDir, mesh)
+
+    # as one object
+    else:
+        exportObjects(destDir, generatedElement, True)
+
+
 """
 app definition
 """
 
 
 def sanitizer():
+    print('\nLancement du script\n')
+
     cmds.undoInfo(cn="sanitizer", ock=True)
     # Aware the user of what it will happen
     if storage.values.displayInfo:
         ui.info("Info",
-                "The script will nowproceed through several operations, as you parametered it in the preceding window")
+                "The script will now proceed through several operations, as you parametered it in the preceding window")
 
     # Getting all transformNodes needed
     if storage.values.displayInfo:
         ui.info("Info", "The script gather all the transformNodes of the scene to prepare them to the export")
 
+    # Store meshes following the options
     if not storage.values.selectionOnly:
         cmds.select(all=True, hierarchy=True)
 
-    # Splitting into meshes and otherElement
-    splitTransform()
+    selectedMeshes = cmds.ls(sl=True, type="transform")
 
     # """""""""""""
 
@@ -235,6 +276,8 @@ def sanitizer():
     if storage.values.displayInfo:
         ui.info("Info", "The script is opening the duplicated scene in Maya")
 
+    # We need to save the scene to save the metadata modified
+    cmds.file(save=True)
     cmds.file(sceneCopy, open=True)
 
     # """""""""""""""""""""
@@ -243,9 +286,17 @@ def sanitizer():
 
     # """""""""""""""""""""
 
+    # First delete history of the transforms
+    for node in selectedMeshes:
+        cmds.delete(node, constructionHistory=True)
+
+    # Splitting into meshes and otherElement
+    splitTransform(selectedMeshes)
+
     # Make sure that at least one mesh or group is selected
     if len(storage.transformNodes) == 0:
         ui.info("Error", "No mesh or group detected in your scene")
+        cmds.file(storage.scene, force=True, open=True)
         print('\nFin du script\n')
         return
 
@@ -305,24 +356,7 @@ def sanitizer():
     # export meshes
     if storage.values.exportResult:
         # Check or create a destination directory
-        destDir = storage.values.exportFolder + "\\" + (sceneName if storage.values.exportName == "" else storage.values.exportName)
-
-        if not cmds.file(destDir, q=True, exists=True):
-            cmds.sysFile(destDir, makeDir=True)
-
-        if storage.values.displayInfo:
-            ui.info("Info",
-                    "The script export your scene as individual meshes and stores them into:\n" + "'" + destDir + "'")
-
-        # Export meshes
-        for mesh in storage.meshes:
-            cmds.select(clear=True)
-            cmds.select(mesh, add=True)
-            if storage.values.exportExtension == "exportFbx":
-                cmds.file(destDir + "\\" + mesh, force = True, options = "v = 0", type = "FBX export", exportSelected = True)
-
-            else:
-                print("WOOOOOPS. This format has not been implemented yet ¯\_(ツ)_/¯")
+        exportMeshes(sceneName, storage.values.exportName)
 
     # check non manyfold mesh
     cmds.select(clear=True)
@@ -332,7 +366,17 @@ def sanitizer():
 
         checkNonManyfold()
 
+    # set back the user to the original scene
+    if storage.values.stayInScene:
+        if storage.values.displayInfo:
+            ui.info("Info", "You choose to stay in your active scene")
+
+        cmds.file(save=True)
+        cmds.file(storage.scene, open=True)
+
     cmds.undoInfo(cn="sanitizer", cck=True)
 
     if storage.values.displayInfo:
         ui.info("Info", "The script has now finished !")
+
+    print('\nFin du script\n')

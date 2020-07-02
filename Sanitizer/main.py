@@ -25,6 +25,23 @@ def reloadAll():
 def initialize():
     streamsName = storage.streams.keys()
     storage.values = utility.Values()
+
+    # check for existing prefs file
+    if os.path.isfile(storage.prefsFile):
+        # print("Prefs file exists")
+        prefs = utility.JsonUtility.read(storage.prefsFile)
+
+        for stream in streamsName:
+            setattr(storage.values, stream, prefs[stream])
+
+    # create a new prefs file
+    else:
+        # print("Prefs file don't exist")
+        open(storage.prefsFile, "a")
+        settings = utility.JsonUtility.createJsonData()
+        utility.JsonUtility.write(storage.prefsFile, settings)
+        # print("Creation of the prefs file")
+
     # Check for datastructure statements
     datastructures = cmds.dataStructure(q=True)
     if not "sanBoolStruct" in datastructures:
@@ -37,6 +54,7 @@ def initialize():
         print("Create sanStringStruct")
         cmds.dataStructure(format='raw', asString='name=sanStringStruct:string=value')
 
+    # Create all on first utilisation
     if not cmds.hasMetadata(channelName='sanitizer', scene=True)[0]:
         print("Creation of the metadata")
         for stream in streamsName:
@@ -45,15 +63,13 @@ def initialize():
                              streamName=stream,
                              channelName='sanitizer',
                              scene=True)
-
+    # Retrieve or create
     else:
         print("Retrieve the metadata")
-        # Retrieve or create
-        print("Read streams")
         for stream in streamsName:
             # create
             if not cmds.hasMetadata(streamName=stream, channelName='sanitizer', scene=True)[0]:
-                print(stream + " => create")
+                # print(stream + " => create")
                 cmds.addMetadata(structure=storage.streams[stream],
                                  streamName=stream,
                                  channelName='sanitizer',
@@ -63,7 +79,7 @@ def initialize():
             else:
                 setattr(storage.values, stream,
                         cmds.getMetadata(streamName=stream, channelName='sanitizer', index=0, scene=True)[0])
-                print(stream + " " + str(getattr(storage.values, stream)) + " => exists")
+                # print(stream + " " + str(getattr(storage.values, stream)) + " => exists")
 
     # Apply metadata values on the scene
     utility.setAllMetadata()
@@ -73,4 +89,4 @@ def initialize():
 def launchApp():
     reloadAll()
     initialize()
-    storage.values.win = ui.createWindow("Sanitizer", lambda command: params.getParams())
+    storage.values.win = ui.createWindow("Sanitizer", lambda command: params.launchScript())

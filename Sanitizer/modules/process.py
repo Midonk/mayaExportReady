@@ -23,8 +23,7 @@ def saveScene():
             scene = cmds.fileDialog2(ds=2, fm=0)
             if scene is not None:
                 storage.scene = scene[0]
-                sceneName = os.path.splitext(storage.scene)[0]
-                storage.scene = cmds.file(scene, rename=sceneName + '.ma')
+                storage.scene = cmds.file(scene, rename=storage.sceneName + '.ma')
                 cmds.file(save=True, type='mayaAscii')
                 print("scene saved as" + storage.scene)
 
@@ -60,7 +59,7 @@ def checkSave():
 
 # Check if the opened scene is an export file
 def checkExportFile(sceneName):
-    if "_export" in sceneName:
+    if "_export" in storage.sceneName:
         # The user canceled the modal
         if not ui.confirm("File duplication",
                           "It seems the open scene is already an export file.\n"
@@ -170,13 +169,10 @@ def checkNonManyfold():
             print(" Non-manifold UV Edges", nue)
             print(" Non-manifold UVs", nuv)
 
-    if len(probMesh) > 0:
-        for prob in probMesh:
-            cmds.select(prob, add=True)
-
-        ui.info("Non-manyfold transformNodes", "Problematic transformNodes have been seleted")
+    return probMesh
 
 
+# Export the objects following parameter
 def exportObjects(destDir, name, asOne=False):
     if storage.values.exportExtension == "exportFbx":
         cmds.loadPlugin('fbxmaya.mll', quiet=True)
@@ -188,7 +184,8 @@ def exportObjects(destDir, name, asOne=False):
         cmds.file(destDir + "\\" + name, force=True, type="OBJexport", exportSelected=not asOne, exportAll=asOne)
 
 
-def exportMeshes(defaultName, customName):
+# Prepare and redirect the objects to the correct export type
+def prepareExport(defaultName, customName):
     # base destDir
     destDir = storage.values.exportFolder
     generatedElement = defaultName if customName == "" else customName
@@ -245,20 +242,22 @@ def sanitizer():
 
     # """""""""""""
 
+    storage.scene = storage.scene = cmds.file(q=True, sn=True)
+
     # check the localization of the file
     storage.scene = cmds.file(q=True, sn=True)
 
     if not checkSave():
         return
 
-    sceneName, sceneExtension = os.path.splitext(os.path.basename(storage.scene))
+    storage.sceneName, storage.sceneExt = os.path.splitext(os.path.basename(storage.scene))
 
     # check if the file is not an export file
-    if not checkExportFile(sceneName):
+    if not checkExportFile(storage.sceneName):
         return
 
     # Check if there is no duplicated project
-    sceneCopy = os.path.join(os.path.dirname(storage.scene), sceneName + "_export" + sceneExtension)
+    sceneCopy = os.path.join(os.path.dirname(storage.scene), storage.sceneName + "_export" + storage.sceneExt)
 
     if storage.values.displayInfo:
         ui.info("Info", "The script is now checking for an existing export file generated earlier")
@@ -356,15 +355,16 @@ def sanitizer():
     # export meshes
     if storage.values.exportResult:
         # Check or create a destination directory
-        exportMeshes(sceneName, storage.values.exportName)
+        prepareExport(storage.sceneName, storage.values.exportName)
 
     # check non manyfold mesh
+    probMesh = []
     cmds.select(clear=True)
     if storage.values.checkNonManyfold:
         if storage.values.displayInfo:
             ui.info("Info", "The script is looking for non-manyfold transformNodes")
 
-        checkNonManyfold()
+        probMesh = checkNonManyfold()
 
     # set back the user to the original scene
     if storage.values.stayInScene:
@@ -373,6 +373,12 @@ def sanitizer():
 
         cmds.file(save=True)
         cmds.file(storage.scene, open=True)
+
+    if len(probMesh) > 0:
+        for prob in probMesh:
+            cmds.select(prob, add=True)
+
+        ui.info("Non-manyfold transformNodes", "Problematic transformNodes have been seleted")
 
     cmds.undoInfo(cn="sanitizer", cck=True)
 

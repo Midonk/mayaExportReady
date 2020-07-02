@@ -44,7 +44,7 @@ class Values:
             os.path.dirname(cmds.about(env=True))) if sceneDir == "" else sceneDir
         self.exportAsOneObject = _exportAsOneObject
         self.exportExtension = _exportExtension or "exportFbx"
-        self.exportName = _exportName or "myExportFolder"
+        self.exportName = _exportName or ""
         self.unityRefDir = _unityRefDir or os.path.join(os.path.dirname(os.path.dirname(__file__)), "Refs")
         self.cleanUpMesh = _cleanUpMesh
         self.checkNonManyfold = _checkNonManyfold
@@ -134,3 +134,10 @@ class JsonUtility():
     def write(path, data):
         with open(path, 'w') as file:
             json.dump(data, file, indent=4)
+
+
+def createPrefs():
+    # print("Creation of the prefs file")
+    open(storage.prefsFile, "a")
+    settings = JsonUtility.createJsonData()
+    JsonUtility.write(storage.prefsFile, settings)

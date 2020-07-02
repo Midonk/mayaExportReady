@@ -194,11 +194,20 @@ def createWindow(name, callback):
     cmds.columnLayout("General", adj=False, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l='<span style="font-size:18px">General options</span>', font="boldLabelFont")
     cmds.text(l="")
-    cmds.checkBox("freezeTransform", l="Freeze transformations", v=storage.values.freezeTransform)
-    cmds.checkBox("deleteHistory", l="Delete history", v=storage.values.deleteHistory)
-    cmds.checkBox("selectionOnly", l="Selection only", v=storage.values.selectionOnly)
-    cmds.checkBox("cleanUpMesh", l="Clean up meshes", v=storage.values.cleanUpMesh)
-    cmds.checkBox("checkNonManyfold", l="Check for non-manyfold meshes", v=storage.values.checkNonManyfold)
+    cmds.checkBox("freezeTransform", l="Freeze transformations",
+                  ann="Allow the script to freeze the transformation of your selection",
+                  v=storage.values.freezeTransform)
+    cmds.checkBox("deleteHistory", l="Delete history",
+                  ann="Allow the script to delete the construction history of your selection",
+                  v=storage.values.deleteHistory)
+    cmds.checkBox("selectionOnly", l="Selection only",
+                  ann="Restrict the script to process only your selection\nIf false, the all scene will be processed",
+                  v=storage.values.selectionOnly)
+    cmds.checkBox("cleanUpMesh", l="Clean up meshes", ann="Allow the script to go through a clean up your meshes",
+                  v=storage.values.cleanUpMesh)
+    cmds.checkBox("checkNonManyfold", l="Check for non-manyfold meshes",
+                  ann="Allow the script to check non-manifold meshes and giving feedback if found",
+                  v=storage.values.checkNonManyfold)
     cmds.text(l="")
     cmds.setParent('..')
 
@@ -206,8 +215,12 @@ def createWindow(name, callback):
     cmds.columnLayout("Normal", adj=False, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l='<span style="font-size:18px">Normals options</span>', font="boldLabelFont")
     cmds.text(l="")
-    cmds.checkBox("conformNormals", l="Conform normals", v=storage.values.conformNormals)
-    cmds.checkBox("rebuildNormals", l="Rebuild normals", v=storage.values.rebuildNormals, cc=enableRebuildOption)
+    cmds.checkBox("conformNormals", l="Conform normals",
+                  ann="Conform the normals of your meshes.\nSet the normal to the average normal direction",
+                  v=storage.values.conformNormals)
+    cmds.checkBox("rebuildNormals", l="Rebuild normals",
+                  ann="Rebuilds all normals of the mesh with custom angles\nSoft: angle = 30\nHard: angle = 0",
+                  v=storage.values.rebuildNormals, cc=enableRebuildOption)
     cmds.text(label="")
     cmds.text(label="Rebuild options:", align="left")
     cmds.radioButtonGrp("rebuildNormalOption", labelArray3=['Soft', 'Hard', 'Custom'],
@@ -227,6 +240,10 @@ def createWindow(name, callback):
     cmds.radioButtonGrp("pivotOption",
                         labelArray4=['Untouched', 'Mesh center', 'Scene center', 'Base center'],
                         numberOfRadioButtons=4,
+                        an1="Don't modify the pivot parameters",
+                        an2="Set the pivot position at the center of every meshes",
+                        an3="Set the pivot of every meshes at the center of the scene",
+                        an4="Set the pivot of every meshes at the center of the mesh for XZ coordinates\nand at the lowest vertex position for the Y coordinate",
                         select=storage.values.pivotOption,
                         vertical=True)
     cmds.text(l="")
@@ -236,24 +253,34 @@ def createWindow(name, callback):
     cmds.columnLayout("Export", adj=False, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l='<span style="font-size:18px">Export settings</span>', font="boldLabelFont")
     cmds.text(l="")
-    cmds.checkBox("exportResult", l="Export result", v=storage.values.exportResult, cc=onEnableExport)
-    cmds.checkBox("exportAsOneObject", l="Export as one object", v=storage.values.exportAsOneObject,
+    cmds.checkBox("exportResult", l="Export result", ann="Allow the script to export the result of the process",
+                  v=storage.values.exportResult, cc=onEnableExport)
+    cmds.checkBox("exportAsOneObject", l="Export as one object",
+                  ann="The script will export the selection as one only object", v=storage.values.exportAsOneObject,
                   cc=updateExportNameLabel)
     cmds.text(l="")
     cmds.text("exportFolderInput", l="Export path:")
     cmds.rowLayout(adjustableColumn=2, numberOfColumns=2)
-    cmds.textField("exportFolderInput", fi=storage.values.exportFolder, w=300, h=26, cc=checkExportFolder)
-    cmds.button("exportFolderBrowserButton", l="Browse", c=searchExportFolder)
+    cmds.textField("exportFolderInput", ann="Path of the folder where the exported files will drop",
+                   fi=storage.values.exportFolder, w=300, h=26, cc=checkExportFolder)
+    cmds.button("exportFolderBrowserButton", ann="Open dialog to search an export folder", l="Browse",
+                c=searchExportFolder)
     cmds.setParent('..')
     cmds.text(l="")
     cmds.text("exportNameLabel", l="")
     cmds.text("exportNameLabel", e=True, l=updateExportNameLabel(storage.values.exportAsOneObject))
-    cmds.textField("exportNameInput", text=storage.values.exportName, w=351, h=26, cc=updateExportName, pht=os.path.splitext(os.path.basename(cmds.file(q=True, sn=True)))[0])
+    storage.scene = cmds.file(q=True, sn=True)
+    storage.sceneName, storage.sceneExt = os.path.splitext(os.path.basename(storage.scene))
+    print("sceneName", storage.sceneName)
+    cmds.textField("exportNameInput", text=storage.values.exportName,
+                   ann="Name that will have the folder or the file that will be exported", w=351, h=26,
+                   cc=updateExportName,
+                   pht=storage.sceneName if storage.sceneName != "" else "untitled")
     cmds.text(l="")
     cmds.radioCollection("exportExtension")
     cmds.text("radioColExtentionLabel", l="Export as")
-    cmds.radioButton("exportFbx", l="FBX", onCommand=onFbxExtension)
-    cmds.radioButton("exportObj", l="OBJ", onCommand=onObjExtension)
+    cmds.radioButton("exportFbx", ann="The script will export the meshes as FBX", l="FBX", onCommand=onFbxExtension)
+    cmds.radioButton("exportObj", ann="The script will export the meshes as OBJ", l="OBJ", onCommand=onObjExtension)
     cmds.radioCollection("exportExtension", e=True, select=storage.values.exportExtension)
 
     onEnableExport(cmds.checkBox("exportResult", q=True, v=True))
@@ -266,8 +293,9 @@ def createWindow(name, callback):
     cmds.columnLayout("refWraper")
     cmds.setParent('..')
     cmds.rowLayout(adjustableColumn=2, numberOfColumns=2)
-    cmds.button(label="Search", c=searchRefs, w=150)
-    cmds.button('unityImportRef', l='Import reference', c=importRef, w=150)
+    cmds.button(label="Search", ann="Open dialog to search a folder with\nFBX or OBJ files in it", c=searchRefs, w=150)
+    cmds.button('unityImportRef', l='Import reference', ann="Import the selected reference into the active scene",
+                c=importRef, w=150)
     cmds.setParent('..')
     cmds.text(l="")
     displayRefs(storage.values.unityRefDir)
@@ -277,9 +305,15 @@ def createWindow(name, callback):
     cmds.columnLayout("Settings", adj=False, columnOffset=["both", storage.inShelfOffset])
     cmds.text(l='<span style="font-size:18px">Settings options</span>', font="boldLabelFont")
     cmds.text(l="")
-    cmds.checkBox("alwaysOverrideExport", l="Override existing export file", v=storage.values.alwaysOverrideExport)
-    cmds.checkBox("stayInScene", l="Stay in active scene", v=storage.values.stayInScene)
-    cmds.checkBox("displayInfo", l="Display informations", v=storage.values.displayInfo)
+    cmds.checkBox("alwaysOverrideExport", l="Override existing export file",
+                  ann="The script will override, by default, the corresponding export file if it exists",
+                  v=storage.values.alwaysOverrideExport)
+    cmds.checkBox("stayInScene", l="Stay in active scene",
+                  ann="True: the script will end on the active scene\nFalse:the script will end on the export file of the active scene",
+                  v=storage.values.stayInScene)
+    cmds.checkBox("displayInfo", l="Display informations",
+                  ann="Allow the script to gives you mass informations on what is happening during the process",
+                  v=storage.values.displayInfo)
     cmds.text(l="")
     cmds.text(l="Preferences:")
     cmds.button("saveAsPrefs", l="Save settings", c=savePreferences, w=125)

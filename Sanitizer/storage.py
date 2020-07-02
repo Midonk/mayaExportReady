@@ -30,6 +30,8 @@ values = None
 
 # Opened scene in Maya
 scene = ""
+sceneName = ""
+sceneExt = ""
 
 # Nodes retrieved from the scene
 transformNodes = []

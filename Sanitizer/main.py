@@ -37,10 +37,7 @@ def initialize():
     # create a new prefs file
     else:
         # print("Prefs file don't exist")
-        open(storage.prefsFile, "a")
-        settings = utility.JsonUtility.createJsonData()
-        utility.JsonUtility.write(storage.prefsFile, settings)
-        # print("Creation of the prefs file")
+        utility.createPrefs()
 
     # Check for datastructure statements
     datastructures = cmds.dataStructure(q=True)
@@ -80,6 +77,15 @@ def initialize():
                 setattr(storage.values, stream,
                         cmds.getMetadata(streamName=stream, channelName='sanitizer', index=0, scene=True)[0])
                 # print(stream + " " + str(getattr(storage.values, stream)) + " => exists")
+
+    # check if the directories path are valid (preventing scene exchange with wrong metadatas)
+    if not os.path.isdir(storage.values.exportFolder):
+        print("is not dir")
+        storage.values.exportFolder = os.path.dirname(os.path.dirname(cmds.about(env=True)))
+
+    if not os.path.isdir(storage.values.unityRefDir):
+        print("is not dir")
+        storage.values.unityRefDir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Refs")
 
     # Apply metadata values on the scene
     utility.setAllMetadata()

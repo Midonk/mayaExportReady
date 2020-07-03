@@ -12,7 +12,7 @@ This script has been designed for game developpers but can also be really helpfu
 1. Set the console to Python (in Python by default)
 1. Copy paste those two lines into the console
     ```python
-    import Sanitizer.setup as setup
+    import mayaExporterReady.setup as setup
     setup.createShelf()
     ```
 1. Press **CTRL + Enter**

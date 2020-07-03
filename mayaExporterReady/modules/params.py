@@ -2,7 +2,7 @@
 
 import maya.cmds as cmds
 import process
-from Sanitizer import storage
+from mayaExporterReady import storage
 import utility
 
 
@@ -12,9 +12,9 @@ def launchScript():
     # update all metadata
     utility.setAllMetadata()
 
-    cmds.deleteUI("sanitizer")
+    cmds.deleteUI(storage.values.win)
     # launch the process
-    process.sanitizer()
+    process.mayaExporterReady()
 
 
 # Links params between UI and script

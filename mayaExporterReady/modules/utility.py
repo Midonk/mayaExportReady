@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import maya.cmds as cmds
-from Sanitizer import storage
+from mayaExporterReady import storage
 import os
 import json
 
@@ -56,25 +56,25 @@ class Values:
 
 # Update unityRef directory in metadata
 def setUnityRefDir():
-    cmds.editMetadata(streamName='unityRefDir', channelName='sanitizer', index=0,
+    cmds.editMetadata(streamName='unityRefDir', channelName='mayaExporterReady', index=0,
                       stringValue=storage.values.unityRefDir,
                       scene=True)
 
 
 def setExportFolder():
-    cmds.editMetadata(streamName='exportFolder', channelName='sanitizer', index=0,
+    cmds.editMetadata(streamName='exportFolder', channelName='mayaExporterReady', index=0,
                       stringValue=storage.values.exportFolder,
                       scene=True)
 
 
 def setExportExtension():
-    cmds.editMetadata(streamName='exportExtension', channelName='sanitizer', index=0,
+    cmds.editMetadata(streamName='exportExtension', channelName='mayaExporterReady', index=0,
                       stringValue=storage.values.exportExtension,
                       scene=True)
 
 
 def setExportName():
-    cmds.editMetadata(streamName='exportName', channelName='sanitizer', index=0, stringValue=storage.values.exportName,
+    cmds.editMetadata(streamName='exportName', channelName='mayaExporterReady', index=0, stringValue=storage.values.exportName,
                       scene=True)
 
 
@@ -84,12 +84,12 @@ def setAllMetadata():
     for stream in storage.streams.keys():
         # print(stream, getattr(storage.values, stream))
         if storage.streams[stream] == "sanStringStruct":
-            cmds.editMetadata(streamName=stream, channelName='sanitizer', index=0,
+            cmds.editMetadata(streamName=stream, channelName='mayaExporterReady', index=0,
                               stringValue=getattr(storage.values, stream),
                               scene=True)
 
         else:
-            cmds.editMetadata(streamName=stream, channelName='sanitizer', index=0,
+            cmds.editMetadata(streamName=stream, channelName='mayaExporterReady', index=0,
                               value=getattr(storage.values, stream),
                               scene=True)
 

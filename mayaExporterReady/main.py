@@ -52,30 +52,30 @@ def initialize():
         cmds.dataStructure(format='raw', asString='name=sanStringStruct:string=value')
 
     # Create all on first utilisation
-    if not cmds.hasMetadata(channelName='sanitizer', scene=True)[0]:
+    if not cmds.hasMetadata(channelName='mayaExporterReady', scene=True)[0]:
         print("Creation of the metadata")
         for stream in streamsName:
             # create
             cmds.addMetadata(structure=storage.streams[stream],
                              streamName=stream,
-                             channelName='sanitizer',
+                             channelName='mayaExporterReady',
                              scene=True)
     # Retrieve or create
     else:
         print("Retrieve the metadata")
         for stream in streamsName:
             # create
-            if not cmds.hasMetadata(streamName=stream, channelName='sanitizer', scene=True)[0]:
+            if not cmds.hasMetadata(streamName=stream, channelName='mayaExporterReady', scene=True)[0]:
                 # print(stream + " => create")
                 cmds.addMetadata(structure=storage.streams[stream],
                                  streamName=stream,
-                                 channelName='sanitizer',
+                                 channelName='mayaExporterReady',
                                  scene=True)
 
             # retrieve
             else:
                 setattr(storage.values, stream,
-                        cmds.getMetadata(streamName=stream, channelName='sanitizer', index=0, scene=True)[0])
+                        cmds.getMetadata(streamName=stream, channelName='mayaExporterReady', index=0, scene=True)[0])
                 # print(stream + " " + str(getattr(storage.values, stream)) + " => exists")
 
     # check if the directories path are valid (preventing scene exchange with wrong metadatas)
@@ -95,4 +95,4 @@ def initialize():
 def launchApp():
     reloadAll()
     initialize()
-    storage.values.win = ui.createWindow("Sanitizer", lambda command: params.launchScript())
+    storage.values.win = ui.createWindow("MayaExporterReady", lambda command: params.launchScript())

@@ -3,7 +3,7 @@
 import maya.cmds as cmds
 import os
 import params
-from Sanitizer import storage
+from mayaExporterReady import storage
 import utility
 
 
@@ -86,7 +86,7 @@ def refStorage(refs):
             cmds.setParent("..")
 
 
-# Searches 'obj' or 'fbx' references into the specified folder and displays it into the 'Sanitizer' window
+# Searches 'obj' or 'fbx' references into the specified folder and displays it into the 'mayaExporterReady' window
 def displayRefs(refDir):
     if cmds.columnLayout("refContainer", q=True, exists=True):
         cmds.deleteUI("refContainer", layout=True)
@@ -176,16 +176,16 @@ def resetToPrefs(*args):
     for stream in streamsName:
         setattr(storage.values, stream, prefs[stream])
 
-    cmds.deleteUI("sanitizer")
-    storage.values.win = createWindow("Sanitizer", lambda command: params.launchScript())
+    cmds.deleteUI(storage.values.win)
+    storage.values.win = createWindow("MayaExporterReady", lambda command: params.launchScript())
 
 
-# Create the UI for the sanitizer
+# Create the UI for the mayaExporterReady
 def createWindow(name, callback):
     # check if the window exists already
-    if cmds.window("sanitizer", exists=True):
-        cmds.deleteUI("sanitizer")
-    _win = cmds.window("sanitizer", title=name)
+    if cmds.window("mayaExporterReady", exists=True):
+        cmds.deleteUI("mayaExporterReady")
+    _win = cmds.window("mayaExporterReady", title=name)
 
     cmds.rowColumnLayout("global", adjustableColumn=True, columnOffset=[1, "both", storage.globalColumnOffset])
     cmds.shelfTabLayout('mainShelfTab', w=storage.shelfWidth)

@@ -1,21 +1,21 @@
 {
-    "rebuildNormalOption": 1, 
+    "rebuildNormalOption": 2, 
     "cleanUpMesh": true, 
-    "pivotOption": 1, 
+    "pivotOption": 2, 
     "selectionOnly": false, 
     "checkNonManyfold": true, 
     "deleteHistory": true, 
     "stayInScene": true, 
     "rebuildNormals": true, 
-    "exportName": "", 
+    "exportName": "test", 
     "freezeTransform": true, 
     "displayInfo": false, 
     "customNormalAngle": 60, 
     "alwaysOverrideExport": true, 
-    "unityRefDir": "C:/Users/Midonk/Documents/maya/scripts\\Sanitizer\\Refs", 
-    "exportResult": false, 
-    "exportAsOneObject": false, 
+    "unityRefDir": "C:/Users/Midonk/Documents/maya/scripts/mayaExporterReady/Refs", 
+    "exportResult": true, 
+    "exportAsOneObject": true, 
     "conformNormals": true, 
     "exportExtension": "exportFbx", 
-    "exportFolder": "C:/Users/Midonk/Documents/maya"
+    "exportFolder": "C:/Users/Midonk/Documents/maya/scripts/mayaExporterReady/Refs"
 }

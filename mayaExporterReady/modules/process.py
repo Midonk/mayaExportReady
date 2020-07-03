@@ -4,7 +4,7 @@ import maya.cmds as cmds
 import os
 import ui_manager as ui
 import utility
-from Sanitizer import storage
+from mayaExporterReady import storage
 
 fileExists = cmds.file(storage.scene, q=True, exists=True)
 fileModified = cmds.file(storage.scene, q=True, modified=True)
@@ -22,10 +22,15 @@ def saveScene():
         else:
             scene = cmds.fileDialog2(ds=2, fm=0)
             if scene is not None:
+                print("scene 1", scene)
                 storage.scene = scene[0]
-                storage.scene = cmds.file(scene, rename=storage.sceneName + '.ma')
+                sceneName = os.path.splitext(os.path.basename(storage.scene))[0]
+                print("sceneName", sceneName)
+                print("storage.scene 1", storage.scene)
+                storage.scene = cmds.file(rename=os.path.join(os.path.dirname(storage.scene), sceneName + ".ma"))
+                print("storage.scene 2", storage.scene)
                 cmds.file(save=True, type='mayaAscii')
-                print("scene saved as" + storage.scene)
+                print("scene saved as " + storage.scene)
 
             # The user canceled the dialog
             else:
@@ -217,10 +222,10 @@ app definition
 """
 
 
-def sanitizer():
+def mayaExporterReady():
     print('\nLancement du script\n')
 
-    cmds.undoInfo(cn="sanitizer", ock=True)
+    cmds.undoInfo(cn="mayaExporterReady", ock=True)
     # Aware the user of what it will happen
     if storage.values.displayInfo:
         ui.info("Info",
@@ -380,7 +385,7 @@ def sanitizer():
 
         ui.info("Non-manyfold transformNodes", "Problematic transformNodes have been seleted")
 
-    cmds.undoInfo(cn="sanitizer", cck=True)
+    cmds.undoInfo(cn="mayaExporterReady", cck=True)
 
     if storage.values.displayInfo:
         ui.info("Info", "The script has now finished !")

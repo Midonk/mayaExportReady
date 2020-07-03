@@ -6,6 +6,7 @@ If you want it, the script can also export your scene as '.obj' or '.fbx'
 This script has been designed for game developpers but can also be really helpful for other people
 
 ## Installing the script:
+1. Set the 'mayaExporterReady' folder into 'Documents\maya\scripts' folder
 1. Open Maya
 1. Open the console at the bottom right of your screen "{;}"
 1. Set the console to Python (in Python by default)

@@ -1,4 +1,4 @@
-# Sanitizer
+# MayaExporterReady
 ## In short:
 The 'Sanitizer' script has been created to allow you tu prepare your scene and meshes to be exported. 
 If you want it, the script can also export your scene as '.obj' or '.fbx'

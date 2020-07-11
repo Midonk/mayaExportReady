@@ -22,13 +22,9 @@ def saveScene():
         else:
             scene = cmds.fileDialog2(ds=2, fm=0)
             if scene is not None:
-                print("scene 1", scene)
                 storage.scene = scene[0]
                 sceneName = os.path.splitext(os.path.basename(storage.scene))[0]
-                print("sceneName", sceneName)
-                print("storage.scene 1", storage.scene)
                 storage.scene = cmds.file(rename=os.path.join(os.path.dirname(storage.scene), sceneName + ".ma"))
-                print("storage.scene 2", storage.scene)
                 cmds.file(save=True, type='mayaAscii')
                 print("scene saved as " + storage.scene)
 

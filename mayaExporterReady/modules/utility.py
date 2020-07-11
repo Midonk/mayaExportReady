@@ -80,7 +80,7 @@ def setExportName():
 
 # Update all metadata
 def setAllMetadata():
-    print("Saving ALL metadata")
+    # print("Saving ALL metadata")
     for stream in storage.streams.keys():
         # print(stream, getattr(storage.values, stream))
         if storage.streams[stream] == "sanStringStruct":

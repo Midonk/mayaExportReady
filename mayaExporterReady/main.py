@@ -42,18 +42,18 @@ def initialize():
     # Check for datastructure statements
     datastructures = cmds.dataStructure(q=True)
     if not "sanBoolStruct" in datastructures:
-        print("Create sanBoolStruct")
+        # print("Create sanBoolStruct")
         cmds.dataStructure(format='raw', asString='name=sanBoolStruct:bool=value')
     if not "sanIntStruct" in datastructures:
-        print("Create sanIntStruct")
+        # print("Create sanIntStruct")
         cmds.dataStructure(format='raw', asString='name=sanIntStruct:int32=value')
     if not "sanStringStruct" in datastructures:
-        print("Create sanStringStruct")
+        # print("Create sanStringStruct")
         cmds.dataStructure(format='raw', asString='name=sanStringStruct:string=value')
 
     # Create all on first utilisation
     if not cmds.hasMetadata(channelName='mayaExporterReady', scene=True)[0]:
-        print("Creation of the metadata")
+        # print("Creation of the metadata")
         for stream in streamsName:
             # create
             cmds.addMetadata(structure=storage.streams[stream],
@@ -62,7 +62,7 @@ def initialize():
                              scene=True)
     # Retrieve or create
     else:
-        print("Retrieve the metadata")
+        # print("Retrieve the metadata")
         for stream in streamsName:
             # create
             if not cmds.hasMetadata(streamName=stream, channelName='mayaExporterReady', scene=True)[0]:
@@ -80,11 +80,9 @@ def initialize():
 
     # check if the directories path are valid (preventing scene exchange with wrong metadatas)
     if not os.path.isdir(storage.values.exportFolder):
-        print("is not dir")
         storage.values.exportFolder = os.path.dirname(os.path.dirname(cmds.about(env=True)))
 
     if not os.path.isdir(storage.values.unityRefDir):
-        print("is not dir")
         storage.values.unityRefDir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Refs")
 
     # Apply metadata values on the scene

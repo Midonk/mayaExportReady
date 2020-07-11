@@ -125,7 +125,7 @@ def importRef(*args):
 def checkExportFolder(path):
     # Register the new export folder
     if cmds.file(path, q=True, exists=True):
-        print("in check export folder", path)
+        # print("in check export folder", path)
         storage.values.exportFolder = path
         utility.setExportFolder()
         cmds.textField("exportFolderInput", e=True, text=path)
@@ -271,7 +271,7 @@ def createWindow(name, callback):
     cmds.text("exportNameLabel", e=True, l=updateExportNameLabel(storage.values.exportAsOneObject))
     storage.scene = cmds.file(q=True, sn=True)
     storage.sceneName, storage.sceneExt = os.path.splitext(os.path.basename(storage.scene))
-    print("sceneName", storage.sceneName)
+    # print("sceneName", storage.sceneName)
     cmds.textField("exportNameInput", text=storage.values.exportName,
                    ann="Name that will have the folder or the file that will be exported", w=351, h=26,
                    cc=updateExportName,
@@ -340,7 +340,7 @@ CREATE MODAL
 
 # Create confirm modal with 'Yes' / 'No' buttons
 def confirm(title, message):
-    print("Display " + title + " confirm")
+    # print("Display " + title + " confirm")
     res = cmds.confirmDialog(title=title,
                              message=message,
                              button=["Yes", "No"],
@@ -349,12 +349,12 @@ def confirm(title, message):
                              dismissString='No')
 
     if res == "Yes":
-        print("Answer => YES")
+        # print("Answer => YES")
         return True
 
     else:
         # display results
-        print("Answer => NO")
+        # print("Answer => NO")
         return False
 
 

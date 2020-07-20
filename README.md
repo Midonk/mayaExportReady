@@ -16,9 +16,9 @@ This script has been designed for game developpers but can also be really helpfu
     setup.createShelf()
     ```
 1. Press **CTRL + Enter**
-1. Click on the button in the new shelf that just appears names "Sanitizer"
+1. Click on the button in the new shelf that just appears names "MayaExporterReady"
 
-┏(＾0＾)┛ **You are done** (~‾▿‾)~
+┏(＾0＾)┛ **You are done** (\~‾▿‾)\~
 
 ## What the script does:
 - **Give a clear UI** allowing the user to manage the process options of the script
@@ -26,7 +26,7 @@ This script has been designed for game developpers but can also be really helpfu
 - **Remind of your preceding options** per scenes making you gain time <br>
     *NOTE: the script uses metadata that are generally saved when you launch the script.*
 - You can **save your settings as preferences** to make your own settings as the default ones in every projects
-- You can **reset the setting of the window** at any time following your preferences
+- You can **reset the settings of the window** at any time following your preferences
 
 ## What the script can do:
 - **Freeze transformations** of all type of transform nodes
@@ -44,4 +44,4 @@ This script has been designed for game developpers but can also be really helpfu
 
 ## What the script don't do
 - As the script check for non-manifold meshes, it's still up to you to clean them up. <br>
-  NOTE: The process gives you informations about the problematic elements
+  *NOTE: The process gives you informations about the problematic elements*

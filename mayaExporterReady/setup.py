@@ -6,8 +6,8 @@ import maya.cmds as cmds
 def createShelf():
     # get the main shelf on the main window
     mainShelfLayout = mel.eval('global string $gShelfTopLevel; string $tmp=$gShelfTopLevel;')
-    command = '''
-    import mayaExporterReady.main as main
+    command ='''
+import mayaExporterReady.main as main
 main.launchApp()
 '''
     # Add the new tab to the main shelf
